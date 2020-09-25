@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Nethope Connectivity Assessment Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+  <script>
+    'use-strict';
+    // Used to prepopulate form with data - specifics are be specifed in JS at the end of the file. 
+    // Minimal required fields are currently populated if this is set to true
+    const prefill = false; // prefill can be false, "test" for test data, or "member" for member customisation
+
+    // if setting prefill as "member" specify the member name here - it must be the same as one of the options in org-name drop down
+    const custom_org_name = '';
+
+    // Configure email specific to your needs
+    const email_to_address = ''; // email address to send results to by default
+    const email_subject = 'Site Data'; // Subject line for email - if specific enough it may be used in rules to automatically move messages to a folder for further processing
+
+    // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
+    // unless page served via https:
+    function getLocation(){
+      const options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+      }
+      if (navigator.geolocation){
+        // get location then pass it to showLocation() for writing into form
+        navigator.geolocation.getCurrentPosition(showLocation,null,options);
+      } else {
+        alert("Geolocation is not supported in this browser.");
+      }
+    }
+    
+    //displays location data in appropriate form fields
+    function showLocation(position){
+      $('#site-latitude').val(position.coords.latitude.toFixed(4)); // use toFixed to round to the same decimal places as used in form validation
+      $('#site-longitude').val(position.coords.longitude.toFixed(4));
+      $('#location-source').val('browser-script');
+      $('#location-accuracy').val(position.coords.accuracy);
+    }
+
+    function siteFormSubmit(){
+
+      const site_form = document.getElementById("site-form");
+      const data_container = document.getElementById("site-data-container");
+      // All the things that are done when the site-form is submitted
+      
+      // 1. Validate the form, and if invalid provide feedback
+      site_form.classList.add('was-validated'); 
+      if (site_form.checkValidity() === false){
+        alert("Some form fields didn't validate. They are highlighted in red. Please scroll up to locate errors.");
+      } else {
+        // If form validates
+
+        // Put field values into JSON format and display this at bottom of page
+        // Get the data from the site_form fields
+        const data = formDataToJSON(site_form);
+
+        // Use JSON.stringify to display valid, human readable JSON.
+        $('#site-data-json').html(JSON.stringify(data,null,2));
+        // show the section of page displaying the collected data
+        $('#site-data-container').removeClass('invisible').addClass('visible');
+        window.scrollTo(0,document.body.scrollHeight);
+
+        //setup mailto string to allow emailing
+        var mailto = `mailto:${email_to_address}?subject=${email_subject}&body=--- Do not edit below this line ---%0D%0A%0D%0A${JSON.stringify(data,null,2)}`;
+        $('#send-email-button').attr('href',mailto);
+
+        /* currenty conflicts with prefill so disabled
+        // save auto-preference fields to localStorage
+        // note this doesn't work for locally accessed page (i.e. URL starts file:///) if Third Party Cookies are disabled in chromium based browsers
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem("pref-org_name", $('#org-name').val());
+          localStorage.setItem("pref-site_country", $('#site-country').val());
+        }; */
+      };
+      return false;
+    };
+
+    function formDataToJSON(form){
+      var array =jQuery(form).serializeArray();
+      var json = {};
+
+      jQuery.each(array, function(){
+        json[this.name] = this.value || '';
+      })
+
+      // add timestamp
+      var d = new Date();
+      json['meta-form-timestamp'] = d.toISOString();
+
+      // add browser string
+      json['meta-form-browser'] = navigator.userAgent;
+      return json;
+    };
+    
+  </script>
+  
+</head>
+
+<body>
+  <header class="container">
+    <h1>Nethope Connectivity Assessment Framework</h1>
+    <p>The form below is designed to collect data about connectivity at a single site.  This 
+      data will be used to generate a connectivity score for the site.</p>
+  </header>
+  <form class="container needs-validation" id="site-form" novalidate onsubmit="event.preventDefault(); siteFormSubmit()">
+    
+    <fieldset class="form-group border p-3 bg-light">
+      <!-- auto-preference field -->
+      <label for="org-code" class="h2">Your organisation <span class="badge-pill badge-secondary">Required</span></label>
+      <select id="org-code" name="org-code" class="custom-select" required>
+        <option selected disabled value="">Select your organisation</option>
+        <option value="ACC">Accion</option>
+        <option value="ACT">ActionAid</option>
+        <option value="AME">Americares</option>
+        <option value="ASH">Ashoka</option>
+        <option value="CAR">Care</option>
+        <option value="CRS">Catholic Relief Services</option>
+        <option value="CFI">ChildFund International</option>
+        <option value="CHI">Children International</option>
+        <option value="CAI">Christian Aid</option>
+        <option value="COM">Compassion International</option>
+        <option value="CWW">Concern Worldwide</option>
+        <option value="DCA">DanChurchAid</option>
+        <option value="DRC">Danish Refugee Council</option>
+        <option value="DIR">Direct Relief</option>
+        <option value="FHI">FHI360</option>
+        <option value="FUP">FUPAD</option>
+        <option value="GCO">Global Communities</option>
+        <option value="GOA">GOAL</option>
+        <option value="HFH">Habitat for Humanity</option>
+        <option value="HFI">Heifer International</option>
+        <option value="HIA">HIAS</option>
+        <option value="IFR">IFRC</option>
+        <option value="IMC">International Medical Corps</option>
+        <option value="IRC">International Rescue Committee</option>
+        <option value="IRW">Islamic Relief Worldwide</option>
+        <option value="MSH">Management Sciences for Health</option>
+        <option value="MSI">Marie Stopes International</option>
+        <option value="MAI">Medair</option>
+        <option value="MSF">Médicins Sans Frontières</option>
+        <option value="MTI">Medical Teams International</option>
+        <option value="MCC">Mennonite Central Committee</option>
+        <option value="MCO">Mercy Corps</option>
+        <option value="MES">Mercy Ships</option>
+        <option value="NRC">Norwegian Refugee Council</option>
+        <option value="OPS">Operation Smile</option>
+        <option value="OXF">Oxfam</option>
+        <option value="PTH">Path</option>
+        <option value="PCI">PCI Global</option>
+        <option value="PLI">Plan International</option>
+        <option value="PMJ">Pro Mujer</option>
+        <option value="RIN">Relief International</option>
+        <option value="RTP">Right to Play</option>
+        <option value="SMP">Samaritan's Purse</option>
+        <option value="SCI">Save the Children</option>
+        <option value="SOS">SOS Children's Villages International</option>
+        <option value="TRB">Team Rubicon Global</option>
+        <option value="CAR">The Carter Center</option>
+        <option value="TNC">The Nature Conservancy</option>
+        <option value="TRO">Trócaire</option>
+        <option value="VSO">VSO</option>
+        <option value="WAI">WaterAid</option>
+        <option value="WHH">Welthungerhilfe</option>
+        <option value="WCS">Wildlife Conservation Society</option>
+        <option value="WRI">Winrock International</option>
+        <option value="WFW">Women for Women International</option>
+        <option value="WVI">World Vision</option>
+        <option value="WWF">WWF International</option>
+      </select>
+      <div class="invalid-feedback">
+        Please select your organisation.
+      </div>
+    </fieldset>
+    
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>General site information</h2>
+      
+      <fieldset class="form-group">
+        <label for="site-name" class="h4">Site Name <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="text" class="form-control" id="site-name" name="site-name" placeholder="Your organisation's name for the site" pattern="[^\{\}]+" required />
+        <div class="invalid-feedback">
+          Please give your site a name by which it can be identified. Please do not use the characters { or }.
+        </div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <!-- auto-preference field -->
+        <!-- source: https://www.freeformatter.com/iso-country-list-html-select.html -->
+        <label for="site-country" class="h4">Country <span class="badge-pill badge-secondary">Required</span></label>
+        <select id="site-country" name="site-country" class="custom-select" required>
+          <option value="" disabled selected>Please select the country</option>
+          <option value="AF">Afghanistan</option>
+          <option value="AX">Åland Islands</option>
+          <option value="AL">Albania</option>
+          <option value="DZ">Algeria</option>
+          <option value="AS">American Samoa</option>
+          <option value="AD">Andorra</option>
+          <option value="AO">Angola</option>
+          <option value="AI">Anguilla</option>
+          <option value="AQ">Antarctica</option>
+          <option value="AG">Antigua and Barbuda</option>
+          <option value="AR">Argentina</option>
+          <option value="AM">Armenia</option>
+          <option value="AW">Aruba</option>
+          <option value="AU">Australia</option>
+          <option value="AT">Austria</option>
+          <option value="AZ">Azerbaijan</option>
+          <option value="BS">Bahamas</option>
+          <option value="BH">Bahrain</option>
+          <option value="BD">Bangladesh</option>
+          <option value="BB">Barbados</option>
+          <option value="BY">Belarus</option>
+          <option value="BE">Belgium</option>
+          <option value="BZ">Belize</option>
+          <option value="BJ">Benin</option>
+          <option value="BM">Bermuda</option>
+          <option value="BT">Bhutan</option>
+          <option value="BO">Bolivia, Plurinational State of</option>
+          <option value="BQ">Bonaire, Sint Eustatius and Saba</option>
+          <option value="BA">Bosnia and Herzegovina</option>
+          <option value="BW">Botswana</option>
+          <option value="BV">Bouvet Island</option>
+          <option value="BR">Brazil</option>
+          <option value="IO">British Indian Ocean Territory</option>
+          <option value="BN">Brunei Darussalam</option>
+          <option value="BG">Bulgaria</option>
+          <option value="BF">Burkina Faso</option>
+          <option value="BI">Burundi</option>
+          <option value="KH">Cambodia</option>
+          <option value="CM">Cameroon</option>
+          <option value="CA">Canada</option>
+          <option value="CV">Cape Verde</option>
+          <option value="KY">Cayman Islands</option>
+          <option value="CF">Central African Republic</option>
+          <option value="TD">Chad</option>
+          <option value="CL">Chile</option>
+          <option value="CN">China</option>
+          <option value="CX">Christmas Island</option>
+          <option value="CC">Cocos (Keeling) Islands</option>
+          <option value="CO">Colombia</option>
+          <option value="KM">Comoros</option>
+          <option value="CG">Congo</option>
+          <option value="CD">Congo, the Democratic Republic of the</option>
+          <option value="CK">Cook Islands</option>
+          <option value="CR">Costa Rica</option>
+          <option value="CI">Côte d'Ivoire</option>
+          <option value="HR">Croatia</option>
+          <option value="CU">Cuba</option>
+          <option value="CW">Curaçao</option>
+          <option value="CY">Cyprus</option>
+          <option value="CZ">Czech Republic</option>
+          <option value="DK">Denmark</option>
+          <option value="DJ">Djibouti</option>
+          <option value="DM">Dominica</option>
+          <option value="DO">Dominican Republic</option>
+          <option value="EC">Ecuador</option>
+          <option value="EG">Egypt</option>
+          <option value="SV">El Salvador</option>
+          <option value="GQ">Equatorial Guinea</option>
+          <option value="ER">Eritrea</option>
+          <option value="EE">Estonia</option>
+          <option value="ET">Ethiopia</option>
+          <option value="FK">Falkland Islands (Malvinas)</option>
+          <option value="FO">Faroe Islands</option>
+          <option value="FJ">Fiji</option>
+          <option value="FI">Finland</option>
+          <option value="FR">France</option>
+          <option value="GF">French Guiana</option>
+          <option value="PF">French Polynesia</option>
+          <option value="TF">French Southern Territories</option>
+          <option value="GA">Gabon</option>
+          <option value="GM">Gambia</option>
+          <option value="GE">Georgia</option>
+          <option value="DE">Germany</option>
+          <option value="GH">Ghana</option>
+          <option value="GI">Gibraltar</option>
+          <option value="GR">Greece</option>
+          <option value="GL">Greenland</option>
+          <option value="GD">Grenada</option>
+          <option value="GP">Guadeloupe</option>
+          <option value="GU">Guam</option>
+          <option value="GT">Guatemala</option>
+          <option value="GG">Guernsey</option>
+          <option value="GN">Guinea</option>
+          <option value="GW">Guinea-Bissau</option>
+          <option value="GY">Guyana</option>
+          <option value="HT">Haiti</option>
+          <option value="HM">Heard Island and McDonald Islands</option>
+          <option value="VA">Holy See (Vatican City State)</option>
+          <option value="HN">Honduras</option>
+          <option value="HK">Hong Kong</option>
+          <option value="HU">Hungary</option>
+          <option value="IS">Iceland</option>
+          <option value="IN">India</option>
+          <option value="ID">Indonesia</option>
+          <option value="IR">Iran, Islamic Republic of</option>
+          <option value="IQ">Iraq</option>
+          <option value="IE">Ireland</option>
+          <option value="IM">Isle of Man</option>
+          <option value="IL">Israel</option>
+          <option value="IT">Italy</option>
+          <option value="JM">Jamaica</option>
+          <option value="JP">Japan</option>
+          <option value="JE">Jersey</option>
+          <option value="JO">Jordan</option>
+          <option value="KZ">Kazakhstan</option>
+          <option value="KE">Kenya</option>
+          <option value="KI">Kiribati</option>
+          <option value="KP">Korea, Democratic People's Republic of</option>
+          <option value="KR">Korea, Republic of</option>
+          <option value="XK">Kosovo</option> <!-- added on request - see https://en.wikipedia.org/wiki/Kosovo for discussion in sidebar -->
+          <option value="KW">Kuwait</option>
+          <option value="KG">Kyrgyzstan</option>
+          <option value="LA">Lao People's Democratic Republic</option>
+          <option value="LV">Latvia</option>
+          <option value="LB">Lebanon</option>
+          <option value="LS">Lesotho</option>
+          <option value="LR">Liberia</option>
+          <option value="LY">Libya</option>
+          <option value="LI">Liechtenstein</option>
+          <option value="LT">Lithuania</option>
+          <option value="LU">Luxembourg</option>
+          <option value="MO">Macao</option>
+          <option value="MK">Macedonia, the former Yugoslav Republic of</option>
+          <option value="MG">Madagascar</option>
+          <option value="MW">Malawi</option>
+          <option value="MY">Malaysia</option>
+          <option value="MV">Maldives</option>
+          <option value="ML">Mali</option>
+          <option value="MT">Malta</option>
+          <option value="MH">Marshall Islands</option>
+          <option value="MQ">Martinique</option>
+          <option value="MR">Mauritania</option>
+          <option value="MU">Mauritius</option>
+          <option value="YT">Mayotte</option>
+          <option value="MX">Mexico</option>
+          <option value="FM">Micronesia, Federated States of</option>
+          <option value="MD">Moldova, Republic of</option>
+          <option value="MC">Monaco</option>
+          <option value="MN">Mongolia</option>
+          <option value="ME">Montenegro</option>
+          <option value="MS">Montserrat</option>
+          <option value="MA">Morocco</option>
+          <option value="MZ">Mozambique</option>
+          <option value="MM">Myanmar</option>
+          <option value="NA">Namibia</option>
+          <option value="NR">Nauru</option>
+          <option value="NP">Nepal</option>
+          <option value="NL">Netherlands</option>
+          <option value="NC">New Caledonia</option>
+          <option value="NZ">New Zealand</option>
+          <option value="NI">Nicaragua</option>
+          <option value="NE">Niger</option>
+          <option value="NG">Nigeria</option>
+          <option value="NU">Niue</option>
+          <option value="NF">Norfolk Island</option>
+          <option value="MP">Northern Mariana Islands</option>
+          <option value="NO">Norway</option>
+          <option value="OM">Oman</option>
+          <option value="PK">Pakistan</option>
+          <option value="PW">Palau</option>
+          <option value="PS">Palestinian Territory, Occupied</option>
+          <option value="PA">Panama</option>
+          <option value="PG">Papua New Guinea</option>
+          <option value="PY">Paraguay</option>
+          <option value="PE">Peru</option>
+          <option value="PH">Philippines</option>
+          <option value="PN">Pitcairn</option>
+          <option value="PL">Poland</option>
+          <option value="PT">Portugal</option>
+          <option value="PR">Puerto Rico</option>
+          <option value="QA">Qatar</option>
+          <option value="RE">Réunion</option>
+          <option value="RO">Romania</option>
+          <option value="RU">Russian Federation</option>
+          <option value="RW">Rwanda</option>
+          <option value="BL">Saint Barthélemy</option>
+          <option value="SH">Saint Helena, Ascension and Tristan da Cunha</option>
+          <option value="KN">Saint Kitts and Nevis</option>
+          <option value="LC">Saint Lucia</option>
+          <option value="MF">Saint Martin (French part)</option>
+          <option value="PM">Saint Pierre and Miquelon</option>
+          <option value="VC">Saint Vincent and the Grenadines</option>
+          <option value="WS">Samoa</option>
+          <option value="SM">San Marino</option>
+          <option value="ST">Sao Tome and Principe</option>
+          <option value="SA">Saudi Arabia</option>
+          <option value="SN">Senegal</option>
+          <option value="RS">Serbia</option>
+          <option value="SC">Seychelles</option>
+          <option value="SL">Sierra Leone</option>
+          <option value="SG">Singapore</option>
+          <option value="SX">Sint Maarten (Dutch part)</option>
+          <option value="SK">Slovakia</option>
+          <option value="SI">Slovenia</option>
+          <option value="SB">Solomon Islands</option>
+          <option value="SO">Somalia</option>
+          <option value="ZA">South Africa</option>
+          <option value="GS">South Georgia and the South Sandwich Islands</option>
+          <option value="SS">South Sudan</option>
+          <option value="ES">Spain</option>
+          <option value="LK">Sri Lanka</option>
+          <option value="SD">Sudan</option>
+          <option value="SR">Suriname</option>
+          <option value="SJ">Svalbard and Jan Mayen</option>
+          <option value="SZ">Swaziland</option>
+          <option value="SE">Sweden</option>
+          <option value="CH">Switzerland</option>
+          <option value="SY">Syrian Arab Republic</option>
+          <option value="TW">Taiwan, Province of China</option>
+          <option value="TJ">Tajikistan</option>
+          <option value="TZ">Tanzania, United Republic of</option>
+          <option value="TH">Thailand</option>
+          <option value="TL">Timor-Leste</option>
+          <option value="TG">Togo</option>
+          <option value="TK">Tokelau</option>
+          <option value="TO">Tonga</option>
+          <option value="TT">Trinidad and Tobago</option>
+          <option value="TN">Tunisia</option>
+          <option value="TR">Turkey</option>
+          <option value="TM">Turkmenistan</option>
+          <option value="TC">Turks and Caicos Islands</option>
+          <option value="TV">Tuvalu</option>
+          <option value="UG">Uganda</option>
+          <option value="UA">Ukraine</option>
+          <option value="AE">United Arab Emirates</option>
+          <option value="GB">United Kingdom</option>
+          <option value="US">United States</option>
+          <option value="UM">United States Minor Outlying Islands</option>
+          <option value="UY">Uruguay</option>
+          <option value="UZ">Uzbekistan</option>
+          <option value="VU">Vanuatu</option>
+          <option value="VE">Venezuela, Bolivarian Republic of</option>
+          <option value="VN">Viet Nam</option>
+          <option value="VG">Virgin Islands, British</option>
+          <option value="VI">Virgin Islands, U.S.</option>
+          <option value="WF">Wallis and Futuna</option>
+          <option value="EH">Western Sahara</option>
+          <option value="YE">Yemen</option>
+          <option value="ZM">Zambia</option>
+          <option value="ZW">Zimbabwe</option>
+        </select>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <label for="site-location" class="h4">Site address/location <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="text" class="form-control" id="site-location" name="site-location" placeholder="Street address and town if possible, otherwise the nearest settlement" pattern="[^\{\}]+" required />
+        <div class="invalid-feedback">
+          Please describe where the site is located, for example an address. Please do not use the characters { or }.
+        </div>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <!-- auto-preference field -->
+        <label for="site-contact" class="h4">Site Contact email address <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="email" inputmode="email" class="form-control" id="site-contact" name="site-contact" required />
+        <small id="siteContactHelperBlock" class="form-text text-muted mb-3">Please provide a contact email address for someone who can answer any follow up questions about
+        the site. If they are based at the site that is ideal.
+        </small>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <div class="input-group form-row">
+          <span class="input-group-text">Site Geolocation</span>
+          <input type="number" inputmode="decimal" step="0.0001" min="-90" max="90" class="form-control" placeholder="Latitude (decimal)" id="site-latitude" name="site-latitude" class="location-field"/>
+          <input type="number" inputmode="decimal" step="0.0001" min="-180" max="180" class="form-control" placeholder="Longitude (decimal)" id="site-longitude" name="site-longitude" class="location-field"/>
+          <input type="button" class="form-control btn btn-info" value="Get" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
+          <input type="hidden" id="location-source" name="location-source"/>
+          <input type="hidden" id="location-accuracy" name="location-accuracy"/>
+          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. If you are at
+            the site you can click the Get button to automatically fill the values based on what your browser detects as your location.<br/>
+            If you aren't at the site you will need to manually supply the values, or leave them blank. <strong>Please don't use the Get function if you aren't at the site!</strong><br/>
+            Latitude and longitude values <strong>must</strong> be in decimal format. Maximum of 4 decimal places.<br />
+            If you have the value in another format (e.g. degrees, minutes and second)
+            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.
+          </small>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <label for="site-users" class="h4">Number of users <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="number" class="form-control" id="site-users" name="site-users" required />
+        <div class="invalid-feedback">
+          Please tell is how many people at the site typically use the internet connection.
+        </div>
+        <small id="siteUsersHelpBlock" class="form-text text-muted">How many people at the site use the internet on
+          a typical day? If in doubt use the total number of staff at the site. Where possible exclude staff that don't 
+          use the internet.
+        </small>
+      </fieldset>
+    </fieldset>
+   
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>Bandwidth <span class="badge-pill badge-secondary">Required</span></h2>
+      <div class="input-group">
+        <span class="input-group-text">Bandwidth in KBps</span>
+        <input type="number" inputmode="numeric" name="down-bandwidth" id="down-bandwidth" class="form-control" placeholder="Download Bandwidth" min="0" required />
+        <div class="invalid-feedback">
+          Please tell us the download bandwidth.
+        </div>
+        <input type="number" inputmode="numeric" id="up-bandwidth" name="up-bandwidth" class="form-control" placeholder="Upload Bandwidth" min="0" required />
+        <div class="invalid-feedback">
+          Please tell us the upload bandwidth.
+        </div>
+      </div>
+      <small id="bandwidthHelpBlock" class="form-text">In all cases, provide the bandwidth the ISP claims. If they give the 
+        bandwidth in MBps, multiply by 1000.
+      </small>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="link-type" class="h2">Link Type <span class="badge-pill badge-secondary">Required</span></label>
+      <select id="link-type" name="link-type" class="custom-select" required>
+        <option disabled selected value="">Please select a link type</option>
+        <option value="fiber">Fiber</option>
+        <option value="cable-dsl">Cable/DSL</option>
+        <option value="point-to-point-wifi">Point to point WiFi</option>
+        <option value="wimax">WiMax</option>
+        <option value="3g-site">3G for site</option>
+        <option value="3g-individual">3G for individuals</option>
+        <option value="4g-site">4G for site</option>
+        <option value="4g-individual">4G for individuals</option>
+        <option value="vsat-c-band">VSAT C Band</option>
+        <option value="vsat-ku-band">VSAT Ku Band</option>
+        <option value="vsat-ka-band">VSAT Ka Band</option>
+        <option value="o3b">O3B</option>
+      </select>
+      <div class="invalid-feedback">
+        Please select a link type
+      </div>
+      <small id="linkTypeHelpBlock" class="form-text">
+        The type of link being used often affects the experience of using the link. When assessing the link type, 
+        do not rely entirely on how the ISP marketed the connection or the equipment installed at the site.  It is 
+        possible to have a local fibre link to the site that connects to a VSAT backbone – this will have the same 
+        issues as a local VSAT link, or even be worse! Where you know that the uplink is of a lower quality than the 
+        “last mile” specify that.
+      </small>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="monthly-connectivity-cost" class="h4">Monthly Connectivity Cost</label>
+      <div class="input-group form-row">
+        <span class="input-group-text">$</span>
+        <input type="number" inputmode="numeric" min="1" step="1" class="form-control" id="monthly-connectivity-cost" name="monthly-connectivity-cost" placeholder="Monthly connectivity cost in USD" />
+      </div>
+      <small class="form-text text-muted" id="monthlyConnectivityCostHelperBlock">Please share how much your organisation pays per month for the 
+        connection, converted to USD. Please use <a href="https://www.xe.com/currencyconverter/" target="_blank">xe.com</a> to convert other currencies and round to the nearest USD.
+      </small>
+      <div class="invalid-feedback">
+        Please enter whole dollar values only. No decimals.
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="contention-ratio" class="h2">Contention Ratio</label>
+      <select id="contention-ratio" name="contention-ratio" class="custom-select">
+        <option selected value="unknown">Unknown or untrusted</option>
+        <option value="1">1:1</option>
+        <option value="2">2:1</option>
+        <option value="3-5">3:1 - 5:1</option>
+        <option value="5-10">5:1 - 10:1</option>
+        <option value="11-50">11:1 - 50:1</option>
+        <option value=">50">more than 50:1</option>
+      </select>
+      <small id="contentionRatioHelpBlock" class="form-text">
+        Many ISPs offer a shared or contended connection at a lower cost. This 
+        is recorded as a ratio of the number of customers sharing the connection to 1.
+      </small>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>Latency and Packet Loss</h2>
+      <label for="latency" class="h4 mb-n2">Latency</label>
+      <small id="latencyHelpBlock" class="form-text pb-1">
+        The time taken for packets to reach their destination can have a huge impact on the performance of an internet 
+        connection. Latency can be measured using the ping command, for example <code>ping -n 100 8.8.8.8</code> run 
+        from Windows command line will measure the latency to Google’s DNS server 100 times and return the average, 
+        minimum and maximum Round Trip Time (RTT) values. It is advisable to run these tests at different times and not 
+        only when problems are occurring, in order to discount any local issues.
+      </small>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="latency" id="extreme-latency" value="extreme" novalidate  />
+        <label class="custom-control-label" for="extreme-latency">Extremely High<br />
+          <small class="form-text">RTT greater than 800. Regular latency above 
+          this should always be raised with the ISP.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="latency" id="high-latency" value="high" />
+        <label class="custom-control-label" for="high-latency">High<br />
+        <small class="form-text">RTT greater than 500.  Geostationary VSAT will always have values over this.  
+        For non-VSAT connection, raise these latencies with the ISP.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="latency" id="medium-latency" value="medium" />
+        <label class="custom-control-label" for="medium-latency">Medium<br />
+        <small class="form-text">RTT greater than 300. This is the maximum level that Microsoft says will work 
+          with Dynamics, although it is not always a problem.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="latency" id="low-latency" value="low" />
+        <label class="custom-control-label" for="low-latency">Low<br />
+        <small class="form-text">RTT less than 300.  All applications should work fine.</small></label>
+      </div>
+
+      <label for="packet-loss" class="mb-n3 mt-2 h4">Packet loss</label>
+      <small class="form-text pb-1" id="packetLossHelperBox">
+        The command <code>ping -n 100 8.8.8.8</code> will also return the percentage of packets which are lost, which
+        also has an impact on user experience.
+      </small>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="packet-loss" id="high-packet-loss" value="high" />
+        <label class="custom-control-label" for="high-packet-loss">High<br />
+        <small class="form-text">Regular packet loss greater than 5%</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="packet-loss" id="medium-packet-loss" value="high" />
+        <label class="custom-control-label" for="medium-packet-loss">Medium<br />
+        <small class="form-text">Packet loss greater than 2%</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="packet-loss" id="low-packet-loss" value="low" />
+        <label class="custom-control-label" for="low-packet-loss">Low<br />
+        <small class="form-text">Packet loss less than 2%</small></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="class-of-service" class="h2">Class of Service/SLA</label>
+      <small id="classOfServiceHelperBlock" class="form-text text-muted pb-2">This assesses the relationship between 
+        your organisation and the Internet Service Provider (<dfn>ISP</dfn>) in relation to the site. Is the product bought offered by the ISP as 
+        business class, or does it have a Service Level Agreement (<dfn>SLA</dfn>) tailored to the site’s needs? Or has a residential product been 
+        selected. If the connection is with a Mobile Network Operator (<dfn>MNO</dfn>), is it specifically marketed as suitable for use by multiple 
+        users at a single site, or is it intended for use on a single cell phone? Does the ISP give you insight 
+        into the usage of the connection in the form of a web portal or regular reports that show bandwidth used, 
+        uptime etc?</small>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="class-of-service" id="business-class-sla" value="business-class-sla" />
+          <label class="custom-control-label" for="business-class-sla">Business Class with SLA<br />
+          <small class="form-text">Fit for purpose SLA with online portal that allow monitoring of link availability and bandwidth 
+            usage (categorised or total?)</small></label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="class-of-service" id="business-class" value="business-class" />
+          <label class="custom-control-label" for="business-class">Business Class<br />
+          <small class="form-text">ISP markets the product as designed for business use but little visibility into traffic use or 
+            uptime unless requested</small></label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="class-of-service" id="residential-class" value="residential" />
+          <label class="custom-control-label" for="residential-class">Residential Class<br />
+          <small class="form-text">Connections marketed for residential or individual use.</small></label>
+        </div> 
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="class-of-service" id="unknown" value="unknown" />
+          <label class="custom-control-label" for="unknown">Unknown<br />
+        </div> 
+      </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="transfer-cap" class="h2">Transfer Cap</label>
+      <small class="form-text text-muted" id="transferCapHelperBlock">Some ISP products have a cap on the amount 
+        of data that can be transferred per month.  This is more common with residential or individual services. 
+        When the cap is reached, the internet stops working or is restricted and some action is required to return 
+        to normal service until the next period of service.</small>
+        <div class="custom-control custom-switch">
+          <input class="custom-control-input" type="checkbox" id="transfer-cap" name="transfer-cap" value="TRUE" />
+          <label class="custom-control-label" for="transfer-cap">A cap is in place and some restriction is experienced in typical months.</label>
+        </div>
+      </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="isp-trust" class="h2">ISP Trust</label>
+      <small class="form-text text-muted pb-2" id="ispTrustHelperBlock">Many of the measures rely on figures supplied 
+        by the ISP. Hopefully you can take these with trust, but there may be cases where you feel the ISP is not 
+        honest or competent and you aren’t getting the bandwidth, availability or performance you expected.</small>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="isp-trust" id="high-trust" value="high-trust" />
+          <label class="custom-control-label" for="high-trust">You believe that you are getting the service levels you agreed to.</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="isp-trust" id="medium-trust" value="medium-trust" />
+          <label class="custom-control-label" for="medium-trust">Generally you trust the ISP, but they may not be able to deliver exactly 
+            as they say all the time.  But it isn’t bad enough to switch to a different supplier.</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="isp-trust" id="low-trust" value="low-trust" />
+          <label class="custom-control-label" for="low-trust">You do not trust the ISP, and believe they have lied to you about the level 
+            of service they promised. You are actively seeking a new supplier or are stuck with this one for some reason.</label>
+        </div>
+      </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="secondary-link" class="h2">Secondary Link</label>
+      <small class="form-text text-muted pb-2" id="secondaryLinkHelperBlock">
+        Business critical sites may have a secondary link used for backup or load balancing purposes.
+      </small>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="secondary-link" id="no-secondary-link" value="none" checked/>
+        <label class="custom-control-label" for="no-secondary-link">No secondary link</label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="secondary-link" id="load-balance-secondary-link" value="load-balanced" />
+        <label class="custom-control-label" for="load-balance-secondary-link">Load balanced/bonded/SDWAN<br />
+          <small class="form-text">Local equipment is used to send traffic over two (or more) links. This 
+            could be through load balancing (sending half the traffic down each link), bonding 
+            (the links are combined) or SDWAN techniques that decide what kind of traffic to send 
+            down which link. All of these result in improvements to user experience all the time.</small>
+        </label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="secondary-link" id="automatic-failover" value="automatic-failover" />
+        <label class="custom-control-label" for="automatic-failover">Failover link (automatic)<br />
+          <small class="form-text">If the primary link goes down, the secondary link is automatically switched to.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="secondary-link" id="manual-failover" value="manual-failover" />
+        <label class="custom-control-label" for="manual-failover">Failover link (manual)<br />
+        <small class="form-text">If the primary link goes down, someone needs to take special action to use the secondary link.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="secondary-link" id="dongles" value="dongles" />
+        <label class="custom-control-label" for="dongles">Multiple dongles<br />
+        <small class="form-text">Some or all staff in the office have 3/4G dongles which they can use if the primary link goes down.</small></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="site-support" class="h2">Site Support</label>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="site-support" id="support-available" value="available" />
+        <label class="custom-control-label" for="support-available">Available<br />
+        <small class="form-text">When an issue arises with the connection, someone from your team or the ISP can attend the site to resolve the issue within 
+          one business day.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="site-support" id="best-effort-support" value="best-effort" />
+        <label class="custom-control-label" for="best-effort-support">Best effort</label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="power-supply" class="h2">Power Supply</label>
+      <small class="form-text text-muted pb-2" id="powerSupplyHelperBlock">
+        Internet outages are frequently caused by local power outages at your site.  Assess whether measures have been taken to reduce the risk of this.
+      </small>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="reliable-grid" value="reliable-grid" />
+        <label class="custom-control-label" for="reliable-grid">Reliable grid<br />
+        <small class="form-text">The power company delivers power reliably. No more than one short power cut per month.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="unreliable-grid" value="unreliable-grid" />
+        <label class="custom-control-label" for="unreliable-grid">Unreliable grid<br />
+        <small class="form-text">Power from the grid is unreliable with frequent power outages during the day and no alternative is available. Select this
+          if there is no backup solution on site.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="automatic-backup-power" value="automatic-backup" />
+        <label class="custom-control-label" for="automatic-backup-power">Backup Power Solution (automatic)<br />
+        <small class="form-text">A generator or battery array is in place covering the while site, and automatically switches over when a power cut occurs. 
+          Select this if the site does not have the grid and always uses a generator or solar for power.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="manual-backup-power" value="manual-backup" />
+        <label class="custom-control-label" for="manual-backup-power">Backup power solution (Manual)<br />
+        <small class="form-text">A generator or battery array is in place covering the whole site, but someone needs to take special action to connect or 
+          start it in the case of power failure.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="individual-backup-power" value="individual-backup" />
+        <label class="custom-control-label" for="individual-backup-power">Backup power solution (Individual)<br />
+        <small class="form-text">Small UPS are in use to provide power backups to individual computers or other equipment. These may only provide continuous 
+          power for a short time to get through short power cuts.</small></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="connection-management" class="h2">Local Connection Management</label>
+      <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="connection-management" id="layer-7" value="layer-7" />
+          <label class="custom-control-label" for="layer-7">Layer 7 traffic shaping and monitoring<br />
+          <small class="form-text">Meraki, Fortinet, Cyberoam or another solution is in place at the site allowing monitoring of how the
+             connection is used and traffic shaping or content filtering is possible.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="connection-management" id="content-filtering" value="content-filtering" />
+        <label class="custom-control-label" for="content-filtering">Content filtering<br />
+        <small class="form-text">Some form of category based content filtering has been applied (e.g. Cisco Umbrella, Webroot) to 
+          the site</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="connection-management" id="monitoring-only" value="monitoring-only" />
+        <label class="custom-control-label" for="monitoring-only">Monitoring only<br />
+        <small class="form-text">No kind of management is possible but some form of monitoring has been applied by the NGO – this can 
+          be as little as uptime monitoring independent of the ISP.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="connection-management" id="no-management" value="no-management" />
+        <label class="custom-control-label" for="no-management">None<br />
+        <small class="form-text">No measures have been taken to manage or monitor the connection</small></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>Local caching and optimsation</h2>
+      <small class="form-text text-muted" id="localCachingHelperBlock">Windows updates can consume as much as 70% of the bandwidth at a 
+        site. These updates are essential but without management they can infringe on productive use of the connection.  A number of 
+        options are available to reduce the impact, including local update servers and peer to peer updating that mean updates only need
+         to be downloaded once per site and are made available to all the devices at the site.</small>
+      <div class="custom-control custom-switch">
+        <input class="custom-control-input" type="checkbox" id="local-update-caching" name="local-update-caching" value="TRUE" />
+        <label class="custom-control-label" for="local-update-caching">Windows and/or anti-virus<br/>
+        <small class="form-text">Some mechanism is in place to reduce the number of times updates have to be downloaded to the site.</small></label>
+      </div>
+      <small class="form-text text-muted">Other content caching is possible and can free bandwidth by reducing downloads of the same material. 
+        Some higher end firewalls include this feature but it usually needs to be configured.</small>
+        <div class="custom-control custom-switch">
+          <input class="custom-control-input" type="checkbox" id="local-content-caching" name="local-content-caching" value="TRUE" />
+          <label class="custom-control-label" for="local-content-caching">Local content cacheing<br/>
+          <small class="form-text">A solution, such as Squid, is in use to cache content.</small></label>
+        </div>
+        <small class="form-text text-muted">Tools such as Riverbed can compress and cache content, using connections more optimally.</small>
+        <div class="custom-control custom-switch">
+          <input class="custom-control-input" type="checkbox" id="optimiser" name="optimiser" value="TRUE" />
+          <label class="custom-control-label" for="optimiser">Optimisation tool<br/>
+          <small class="form-text">A solution such as Riverbed is in place</small></label>
+        </div>
+      </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>WiFi security</h2>
+      <small class="form-text text-muted" id="wifiSecurityHelperBlock">You should know how many users there are at a site, but this 
+        doesn’t mean you know how many devices are being used at the site. Users and visitors can bring additional devices to work, 
+        and in the worse cases the WiFi network is effectively open and being used by anyone in the local area.</small>
+      <div class="custom-control custom-radio">
+          <input class="custom-control-input" type="radio" name="wifi-security" id="individual-passwords" value="enterprise" />
+          <label class="custom-control-label" for="individual-passwords">Individual passwords only<br />
+          <small class="form-text">In order to connect to the network a unique code or user credentials must be used.  
+            This can be corporate credentials for staff and a time limited code for visitors.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="wifi-security" id="psk-guest" value="psk-guest" />
+        <label class="custom-control-label" for="psk-guest">Individual passwords for staff, preshared key for guests<br />
+        <small class="form-text">Staff use their own credentials to access a specific SSID for staff. A guest SSID is in place for guests 
+          and staff personal devices. This SSID may have bandwidth limitations in place, but anyone with the PSK can access it.</small></label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="wifi-security" id="psk-only" value="psk-only" />
+        <label class="custom-control-label" for="psk-only">Preshared keys only<br />
+        <small class="form-text">Staff and guest SSIDs use preshared keys – anyone who knows these can access either network.</small></label>
+      </div>
+      <div class="custom-control custom-radio mb-3">
+        <input class="custom-control-input" type="radio" name="wifi-security" id="open" value="open" />
+        <label class="custom-control-label" for="open">Open WiFi<br />
+        <small class="form-text"><strong>Any</strong> SSID is set up as open, with no security.</small></label>
+      </div>
+      
+      <small class="form-text text-muted pb-2">Do you have the means to check how many devices are connecting so that any that 
+        shouldn’t be can be investigated.</small>
+      <div class="custom-control custom-switch">
+        <input class="custom-control-input" type="checkbox" id="wifi-monitoring" name="wifi-monitoring" value="TRUE" />
+        <label class="custom-control-label" for="wifi-monitoring">WiFi Monitoring<br />
+          <small class="form-text">A solution is in place to check how many devices access the network, and can be compared to the 
+            expected.  This may also include the ability to identify and even block specific devices.  Meraki Access Points have the 
+            ability to do this.</small>
+        </label>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="site-comment" class="h2">Site Comment</label>
+      <input type="text" class="form-control" name="site-comment" id="site-comment" pattern="[^\{\}]+" >
+      <small class="form-text">Use this field to record anything else about the site or its connectivity
+        you want to record.</small>
+        <div class="invalid-feedback">
+          Please do not use the characters { or }.
+        </div>
+    </fieldset>
+
+    <button class="btn btn-primary mb-2" type="submit">Gather Output</button>
+  </form>
+
+  <div id="site-data-container" class="container-sm border p-3 bg-light invisible">
+    <h2>Your site data</h2>
+    <small class="form-text pb-2">Below you will find the output of your answers above. Check to see that you 
+      agree. You can then click the Send this data by email
+      button to put the output into an email that you can send to whoever is collecting the data.
+    </small>
+    <pre id="site-data-json" class="pre-scrollable p-1 bg-info border"></pre>
+    <a class="btn btn-primary" id="send-email-button" target="_blank">Send this data by email</a>
+  </div>
+
+  <!-- Bootstrap Javascript dependencies -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  
+  <script>
+  'use-strict';
+  // If this is going through testing populate the form with test values
+  $(document).ready(function(){
+      if(prefill === 'test'){
+        $('#org-code').val('CAI');
+        $('#site-name').val('test');
+        $('#site-country').val('GB');
+        $('#site-location').val('test');
+        $('#site-contact').val('test@test.com');
+        $('#site-users').val('100');
+        $('#down-bandwidth').val('100');
+        $('#up-bandwidth').val('100');
+        $('#link-type').val('Fiber');
+      } else if (prefill === 'member') {
+        $('#org-name').val(custom_org_name);
+      };
+
+      //If user inputs text into either of the location fields (latitude or longitude), change the location source to "manual"
+      $('#site-latitude').change(function(){
+        $('#location-source').val('manual');
+      });
+
+      /* Currently disabled as this overrides member and test data - needs work
+      
+      if (typeof(Storage) !== "undefined") {
+        if(localStorage.length != 0){
+          // populate defaults on the form - note this does not work properly if third party cookies are blocked unless localhost is whitelisted
+          // see https://stackoverflow.com/questions/55620680/how-do-i-allow-my-local-web-page-access-to-localstorage-in-brave-browser for more info
+          $("#org-name").val(localStorage.getItem("pref-org_name"));
+          $("#site-country").val(localStorage.getItem("pref-site_country"));
+        };
+      };*/
+    });
+  </script>
+</body>
+</html>
