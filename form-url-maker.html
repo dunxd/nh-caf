@@ -15,13 +15,15 @@
     *
     **********/
     function urlFormSubmit(){
-      let url = new URL('nh-caf','https://dunxd.github.io');
+      let url = new URL('nh-caf/site-form.html','https://dunxd.github.io');
       if($('#dest-email').val() != '') url.searchParams.set('dest-email',$('#dest-email').val());
       if($('#email-subject').val() != '') url.searchParams.set('email-subject',encodeURIComponent($('#email-subject').val())); 
       if($('#org-code').val() != null) url.searchParams.set('org-code', $('#org-code').val());
       $('#built-url').val(url.toString());
+      $('#go-btn').attr('href',url.toString());
       $('#build-btn').removeClass('btn-primary').addClass('btn-secondary');
       $('#copy-btn').removeClass('btn-secondary').addClass('btn-primary');
+      $('#go-btn').removeClass('btn-secondary').addClass('btn-success');
     }
 
     function copyUrl(){
@@ -37,8 +39,7 @@
 <body>
   <header class="container">
   <h1>Nethope Connectivity Assessment Framework<br>Form URL Builder</h1>
-  <p>Use this form to create a custom URL for requesting the Connectivity Assessment Form</p>
-  <p>You can share the generated URL with people who will be completing the form.  It sets the following values:</p>
+  <p>Use this form to create a custom URL for requesting the Connectivity Assessment Form. You can share the generated URL with people who will be completing the form.  It sets the following values:</p>
   </header>
   
   <form class="container" id="url-form" onsubmit="event.preventDefault(); urlFormSubmit()">
@@ -121,10 +122,11 @@
       your team wil not need to select it each time they complete the form.
     </small>
 
-    <div class="input-group">
+    <div class="input-group input-group-lg">
       <div class="input-group-prepend"><button class="btn btn-primary mb-2" type="button" id="build-btn" onclick="urlFormSubmit()">Build URL</button></div>
       <input class="form-control" id="built-url" placeholder="URL will appear here">
-      <div class="input-group-append"><button class="btn btn-secondary mb-2" type="button" id="copy-btn" onclick="copyUrl()">Copy URL</button></div>
+      <div class="input-group-append"><button class="btn btn-secondary mb-2" type="button" id="copy-btn" onclick="copyUrl()">Copy URL</button>
+      <a class="btn btn-secondary mb-2 rounded-right" id="go-btn" role="button">Go to URL</a>
     </div>
   </form>
   <!-- Bootstrap Javascript dependencies -->
