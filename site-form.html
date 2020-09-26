@@ -16,7 +16,7 @@
     let searchParams = new URLSearchParams(window.location.search);
     const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
     const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
-    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'CAF site submission';
+    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NH CAF site data';
 
     // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
     // unless page served via https:
