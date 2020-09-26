@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nethope Connectivity Assessment Framework Form URL Builder</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  
+  <script>
+    'use-strict';
+
+    /*********
+    * When form is submitted use the values to create a URL string
+    * Then display the string with a copy to clipboard button
+    *
+    **********/
+    function urlFormSubmit(){
+      let url = new URL('nh-caf','https://dunxd.github.io');
+      if($('#dest-email').val() != '') url.searchParams.set('dest-email',$('#dest-email').val());
+      if($('#email-subject').val() != '') url.searchParams.set('email-subject',encodeURIComponent($('#email-subject').val())); 
+      if($('#org-code').val() != null) url.searchParams.set('org-code', $('#org-code').val());
+      $('#built-url').val(url.toString());
+      $('#build-btn').removeClass('btn-primary').addClass('btn-secondary');
+      $('#copy-btn').removeClass('btn-secondary').addClass('btn-primary');
+    }
+
+    function copyUrl(){
+      let copyText = $('#built-url');
+      copyText.select();
+      document.execCommand("copy");
+      alert("URL copied to clipboard");
+    }
+
+  </script>
+
+</head>
+<body>
+  <header class="container">
+  <h1>Nethope Connectivity Assessment Framework<br>Form URL Builder</h1>
+  <p>Use this form to create a custom URL for requesting the Connectivity Assessment Form</p>
+  <p>You can share the generated URL with people who will be completing the form.  It sets the following values:</p>
+  </header>
+  
+  <form class="container" id="url-form" onsubmit="event.preventDefault(); urlFormSubmit()">
+    <label for="dest-email" class="h2">Destination Email Address</label>
+    <input type="email" inputmode="email" class="form-control" id="dest-email" name="dest-email">
+
+    <small id="dest-emailHelperBlock" class="form-text text-muted mb-3">The email address where data should be sent.<br>
+      If this is not completed, by default the data will be sent to Nethope.
+    </small>
+
+    <label for="email-subject" class="h2">Email Subject</label>
+    <input type="text" class="form-control" id="email-subject" name="email-subject">
+    <small id="email-subjectHelperBlock" class="form-text text-muted mb-3">Set the subject to be used in the data email.
+      <em>Hint - you could use this in a mailbox rule to move these messages into a folder for later processing.</em><br>
+      If you do not set this the subject will be <strong>NH CAF Site Data</strong>
+    </small>
+
+    <label for="org-code" class="h2">Your organisation</label>
+    <select id="org-code" name="org-code" class="custom-select">
+      <option selected disabled value="">Select your organisation</option>
+      <option value="ACC">Accion</option>
+      <option value="ACT">ActionAid</option>
+      <option value="AME">Americares</option>
+      <option value="ASH">Ashoka</option>
+      <option value="CAR">Care</option>
+      <option value="CRS">Catholic Relief Services</option>
+      <option value="CFI">ChildFund International</option>
+      <option value="CHI">Children International</option>
+      <option value="CAI">Christian Aid</option>
+      <option value="COM">Compassion International</option>
+      <option value="CWW">Concern Worldwide</option>
+      <option value="DCA">DanChurchAid</option>
+      <option value="DRC">Danish Refugee Council</option>
+      <option value="DIR">Direct Relief</option>
+      <option value="FHI">FHI360</option>
+      <option value="FUP">FUPAD</option>
+      <option value="GCO">Global Communities</option>
+      <option value="GOA">GOAL</option>
+      <option value="HFH">Habitat for Humanity</option>
+      <option value="HFI">Heifer International</option>
+      <option value="HIA">HIAS</option>
+      <option value="IFR">IFRC</option>
+      <option value="IMC">International Medical Corps</option>
+      <option value="IRC">International Rescue Committee</option>
+      <option value="IRW">Islamic Relief Worldwide</option>
+      <option value="MSH">Management Sciences for Health</option>
+      <option value="MSI">Marie Stopes International</option>
+      <option value="MAI">Medair</option>
+      <option value="MSF">Médicins Sans Frontières</option>
+      <option value="MTI">Medical Teams International</option>
+      <option value="MCC">Mennonite Central Committee</option>
+      <option value="MCO">Mercy Corps</option>
+      <option value="MES">Mercy Ships</option>
+      <option value="NRC">Norwegian Refugee Council</option>
+      <option value="OPS">Operation Smile</option>
+      <option value="OXF">Oxfam</option>
+      <option value="PTH">Path</option>
+      <option value="PCI">PCI Global</option>
+      <option value="PLI">Plan International</option>
+      <option value="PMJ">Pro Mujer</option>
+      <option value="RIN">Relief International</option>
+      <option value="RTP">Right to Play</option>
+      <option value="SMP">Samaritan's Purse</option>
+      <option value="SCI">Save the Children</option>
+      <option value="SOS">SOS Children's Villages International</option>
+      <option value="TRB">Team Rubicon Global</option>
+      <option value="CAR">The Carter Center</option>
+      <option value="TNC">The Nature Conservancy</option>
+      <option value="TRO">Trócaire</option>
+      <option value="VSO">VSO</option>
+      <option value="WAI">WaterAid</option>
+      <option value="WHH">Welthungerhilfe</option>
+      <option value="WCS">Wildlife Conservation Society</option>
+      <option value="WRI">Winrock International</option>
+      <option value="WFW">Women for Women International</option>
+      <option value="WVI">World Vision</option>
+      <option value="WWF">WWF International</option>
+    </select>
+    <small id="org-codeHelperBlock" class="form-text text-muted mb-3">If you select your organisation
+      your team wil not need to select it each time they complete the form.
+    </small>
+
+    <div class="input-group">
+      <div class="input-group-prepend"><button class="btn btn-primary mb-2" type="button" id="build-btn" onclick="urlFormSubmit()">Build URL</button></div>
+      <input class="form-control" id="built-url" placeholder="URL will appear here">
+      <div class="input-group-append"><button class="btn btn-secondary mb-2" type="button" id="copy-btn" onclick="copyUrl()">Copy URL</button></div>
+    </div>
+  </form>
+  <!-- Bootstrap Javascript dependencies -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
