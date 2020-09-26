@@ -10,14 +10,13 @@
     'use-strict';
     // Used to prepopulate form with data - specifics are be specifed in JS at the end of the file. 
     // Minimal required fields are currently populated if this is set to true
-    const prefill = false; // prefill can be false, "test" for test data, or "member" for member customisation
+    const prefill = 'test'; // prefill can be false, "test" for test data, or "member" for member customisation
 
-    // if setting prefill as "member" specify the member name here - it must be the same as one of the options in org-name drop down
-    const custom_org_name = '';
-
-    // Configure email specific to your needs
-    const email_to_address = ''; // email address to send results to by default
-    const email_subject = 'Site Data'; // Subject line for email - if specific enough it may be used in rules to automatically move messages to a folder for further processing
+    // set up presets using URL parameters
+    let searchParams = new URLSearchParams(window.location.search);
+    const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
+    const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
+    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'CAF site submission';
 
     // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
     // unless page served via https:
@@ -579,10 +578,10 @@
       <label for="latency" class="h4 mb-n2">Latency</label>
       <small id="latencyHelpBlock" class="form-text pb-1">
         The time taken for packets to reach their destination can have a huge impact on the performance of an internet 
-        connection. Latency can be measured using the ping command, for example <code>ping -n 100 8.8.8.8</code> run 
+        connection. Latency can be measured using the ping command, for example <kbd>ping -n 100 8.8.8.8</kbd> run 
         from Windows command line will measure the latency to Google’s DNS server 100 times and return the average, 
-        minimum and maximum Round Trip Time (RTT) values. It is advisable to run these tests at different times and not 
-        only when problems are occurring, in order to discount any local issues.
+        minimum and maximum Round Trip Time (RTT) values. It is advisable to run these tests several times and at different times of day 
+        and not only when problems are occurring, in order to discount any temporary issues.
       </small>
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="latency" id="extreme-latency" value="extreme" novalidate  />
@@ -610,7 +609,7 @@
 
       <label for="packet-loss" class="mb-n3 mt-2 h4">Packet loss</label>
       <small class="form-text pb-1" id="packetLossHelperBox">
-        The command <code>ping -n 100 8.8.8.8</code> will also return the percentage of packets which are lost, which
+        The command <kbd>ping -n 100 8.8.8.8</kbd> will also return the percentage of packets which are lost, which
         also has an impact on user experience.
       </small>
       <div class="custom-control custom-radio">
@@ -915,9 +914,9 @@
         $('#down-bandwidth').val('100');
         $('#up-bandwidth').val('100');
         $('#link-type').val('Fiber');
-      } else if (prefill === 'member') {
-        $('#org-name').val(custom_org_name);
-      };
+      } else {
+        if (custom_org_name != '') $('#org-code').val(custom_org_name);
+      }
 
       //If user inputs text into either of the location fields (latitude or longitude), change the location source to "manual"
       $('#site-latitude').change(function(){
