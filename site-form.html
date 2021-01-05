@@ -554,12 +554,12 @@
     </fieldset>
 
     <fieldset class="form-group border p-3 bg-light" id="site-isp-q">
-      <label for="site-isp-name" class="h4">ISP Name</label>
+      <label for="site-isp-name" class="h3">ISP Name</label>
       <input type="text" class="form-control" id="site-isp-name" name="site-isp-name" placeholder="Name of ISP">
     </fieldset>
 
     <fieldset class="form-group border p-3 bg-light">
-      <label for="monthly-connectivity-cost" class="h4">Monthly Connectivity Cost</label>
+      <label for="monthly-connectivity-cost" class="h3">Monthly Connectivity Cost</label>
       <div class="input-group form-row">
         <span class="input-group-text">$</span>
         <input type="number" inputmode="numeric" min="1" step="1" class="form-control" id="monthly-connectivity-cost" name="monthly-connectivity-cost" placeholder="Monthly connectivity cost in USD" />
@@ -573,7 +573,7 @@
     </fieldset>
 
     <fieldset class="form-group border p-3 bg-light">
-      <label for="contention-ratio" class="h2">Contention Ratio</label>
+      <label for="contention-ratio" class="h3">Contention Ratio</label>
       <select id="contention-ratio" name="contention-ratio" class="custom-select">
         <option selected value="unknown">Unknown or untrusted</option>
         <option value="1">1:1</option>
@@ -591,7 +591,7 @@
 
     <fieldset class="form-group border p-3 bg-light">
       <h2>Latency and Packet Loss</h2>
-      <label for="latency" class="h4 mb-n2">Latency</label>
+      <label for="latency" class="h3 mb-n2">Latency</label>
       <small id="latencyHelpBlock" class="form-text pb-1">
         The time taken for packets to reach their destination can have a huge impact on the performance of an internet 
         connection. Latency can be measured using the ping command, for example <kbd>ping -n 100 8.8.8.8</kbd> run 
@@ -623,7 +623,7 @@
         <small class="form-text">RTT less than 300.  All applications should work fine.</small></label>
       </div>
 
-      <label for="packet-loss" class="mb-n3 mt-2 h4">Packet loss</label>
+      <label for="packet-loss" class="mb-n3 mt-2 h3">Packet loss</label>
       <small class="form-text pb-1" id="packetLossHelperBox">
         The command <kbd>ping -n 100 8.8.8.8</kbd> will also return the percentage of packets which are lost, which
         also has an impact on user experience.
