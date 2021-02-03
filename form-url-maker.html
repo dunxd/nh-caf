@@ -27,10 +27,9 @@
     }
 
     function copyUrl(){
-      let copyText = $('#built-url');
-      copyText.select();
-      document.execCommand("copy");
-      alert("URL copied to clipboard");
+      navigator.clipboard.writeText($('#built-url').val())
+      .then(function(){alert('URL copied to clipboard')})
+      .catch(function(){alert("Couldn't copy to clipboard :-(")});
     }
 
   </script>
@@ -129,7 +128,7 @@
     <div class="input-group input-group-lg">
       <div class="input-group-prepend"><button class="btn btn-primary mb-2" type="button" id="build-btn" onclick="urlFormSubmit()">Build URL</button></div>
       <input class="form-control" id="built-url" placeholder="URL will appear here">
-      <div class="input-group-append"><button class="btn btn-secondary mb-2" type="button" id="copy-btn" onclick="copyUrl()">Copy URL</button>
+      <div class="input-group-append"><button class="btn btn-secondary mb-2" type="button" id="copy-btn" onclick="copyUrl2()">Copy URL</button>
       <a class="btn btn-secondary mb-2 rounded-right" id="go-btn" role="button">Go to URL</a>
     </div>
   </form>
