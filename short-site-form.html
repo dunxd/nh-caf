@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Nethope Site Data Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+  <script>
+    'use-strict';
+    // Used to prepopulate form with data - specifics are be specifed in JS at the end of the file. 
+    // Minimal required fields are currently populated if this is set to true
+    const prefill = false; // prefill can be false, true for test data
+
+    // set up presets using URL parameters
+    let searchParams = new URLSearchParams(window.location.search);
+    const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
+    const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
+    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NH CAF site data';
+
+    // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
+    // unless page served via https:
+    function getLocation(){
+      const options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+      }
+      if (navigator.geolocation){
+        // get location then pass it to showLocation() for writing into form
+        navigator.geolocation.getCurrentPosition(showLocation,null,options);
+      } else {
+        alert("Geolocation is not supported in this browser.");
+      }
+    }
+    
+    //displays location data in appropriate form fields
+    function showLocation(position){
+      $('#site-latitude').val(position.coords.latitude.toFixed(4)); // use toFixed to round to the same decimal places as used in form validation
+      $('#site-longitude').val(position.coords.longitude.toFixed(4));
+      $('#location-source').val('browser-script');
+      $('#location-accuracy').val(position.coords.accuracy);
+    }
+
+    function siteFormSubmit(){
+
+      const site_form = document.getElementById("site-form");
+      const data_container = document.getElementById("site-data-container");
+      // All the things that are done when the site-form is submitted
+      
+      // 1. Validate the form, and if invalid provide feedback
+      site_form.classList.add('was-validated'); 
+      if (site_form.checkValidity() === false){
+        alert("Some form fields didn't validate. They are highlighted in red. Please scroll up to locate errors.");
+      } else {
+        // If form validates
+
+        // Put field values into JSON format and display this at bottom of page
+        // Get the data from the site_form fields
+        const data = formDataToJSON(site_form);
+
+        // Use JSON.stringify to display valid, human readable JSON.
+        $('#site-data-json').html(JSON.stringify(data,null,2));
+        // show the section of page displaying the collected data
+        $('#site-data-container').removeClass('invisible').addClass('visible');
+        window.scrollTo(0,document.body.scrollHeight);
+
+        //setup mailto string to allow emailing
+        var mailto = `mailto:${email_to_address}?subject=${email_subject}&body=--- Do not edit below this line ---%0D%0A%0D%0A${JSON.stringify(data,null,2)}`;
+        $('#send-email-button').attr('href',mailto);
+
+        /* currenty conflicts with prefill so disabled
+        // save auto-preference fields to localStorage
+        // note this doesn't work for locally accessed page (i.e. URL starts file:///) if Third Party Cookies are disabled in chromium based browsers
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem("pref-org_name", $('#org-name').val());
+          localStorage.setItem("pref-site_country", $('#site-country').val());
+        }; */
+      };
+      return false;
+    };
+
+    function formDataToJSON(form){
+      var array =jQuery(form).serializeArray();
+      var json = {};
+
+      jQuery.each(array, function(){
+        json[this.name] = this.value || '';
+      })
+
+      // add timestamp
+      var d = new Date();
+      json['meta-form-timestamp'] = d.toISOString();
+
+      // add browser string
+      json['meta-form-browser'] = navigator.userAgent;
+      return json;
+    };
+    
+  </script>
+  
+</head>
+
+<body>
+  <header class="container">
+    <h1>Nethope Site Data Form</h1>
+    <p>The form below is designed to collect data about NetHope member's sites.</p>
+  </header>
+  <form class="container needs-validation" id="site-form" novalidate onsubmit="event.preventDefault(); siteFormSubmit()">
+    
+    <fieldset class="form-group border p-3 bg-light">
+      <!-- auto-preference field -->
+      <label for="org-code" class="h2">Your organisation <span class="badge-pill badge-secondary">Required</span></label>
+      <select id="org-code" name="org-code" class="custom-select" required>
+        <option selected disabled value="">Select your organisation</option>
+        <option value="ACC">Accion</option>
+        <option value="ACT">ActionAid</option>
+        <option value="AME">Americares</option>
+        <option value="ASH">Ashoka</option>
+        <option value="CAR">Care</option>
+        <option value="CRS">Catholic Relief Services</option>
+        <option value="CFI">ChildFund International</option>
+        <option value="CHI">Children International</option>
+        <option value="CAI">Christian Aid</option>
+        <option value="COM">Compassion International</option>
+        <option value="CWW">Concern Worldwide</option>
+        <option value="DCA">DanChurchAid</option>
+        <option value="DRC">Danish Refugee Council</option>
+        <option value="DIR">Direct Relief</option>
+        <option value="FHI">FHI360</option>
+        <option value="FUP">FUPAD</option>
+        <option value="GCO">Global Communities</option>
+        <option value="GOA">GOAL</option>
+        <option value="HFH">Habitat for Humanity</option>
+        <option value="HFI">Heifer International</option>
+        <option value="HIA">HIAS</option>
+        <option value="IFR">IFRC</option>
+        <option value="IMC">International Medical Corps</option>
+        <option value="IRC">International Rescue Committee</option>
+        <option value="IRW">Islamic Relief Worldwide</option>
+        <option value="MSH">Management Sciences for Health</option>
+        <option value="MSI">Marie Stopes International</option>
+        <option value="MAI">Medair</option>
+        <option value="MSF">Médicins Sans Frontières</option>
+        <option value="MTI">Medical Teams International</option>
+        <option value="MCC">Mennonite Central Committee</option>
+        <option value="MCO">Mercy Corps</option>
+        <option value="MES">Mercy Ships</option>
+        <option value="NRC">Norwegian Refugee Council</option>
+        <option value="OPS">Operation Smile</option>
+        <option value="OXF">Oxfam</option>
+        <option value="PTH">Path</option>
+        <option value="PCI">PCI Global</option>
+        <option value="PLI">Plan International</option>
+        <option value="PMJ">Pro Mujer</option>
+        <option value="RIN">Relief International</option>
+        <option value="RTP">Right to Play</option>
+        <option value="SAL">Salvation Army</option>
+        <option value="SMP">Samaritan's Purse</option>
+        <option value="SCI">Save the Children</option>
+        <option value="SOS">SOS Children's Villages International</option>
+        <option value="TRB">Team Rubicon Global</option>
+        <option value="CAR">The Carter Center</option>
+        <option value="TNC">The Nature Conservancy</option>
+        <option value="TRO">Trócaire</option>
+        <option value="VSO">VSO</option>
+        <option value="WCH">War Child</option>
+        <option value="WAI">WaterAid</option>
+        <option value="WHH">Welthungerhilfe</option>
+        <option value="WCS">Wildlife Conservation Society</option>
+        <option value="WRI">Winrock International</option>
+        <option value="WFW">Women for Women International</option>
+        <option value="WVI">World Vision</option>
+        <option value="WWF">WWF International</option>
+      </select>
+      <div class="invalid-feedback">
+        Please select your organisation.
+      </div>
+    </fieldset>
+    
+    <fieldset class="form-group border p-3 bg-light">
+      <h2>General site information</h2>
+      
+      <fieldset class="form-group">
+        <label for="site-name" class="h4">Site Name <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="text" class="form-control" id="site-name" name="site-name" placeholder="Your organisation's name for the site" pattern="[^\{\}]+" required />
+        <div class="invalid-feedback">
+          Please give your site a name by which it can be identified. Please do not use the characters { or }.
+        </div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <!-- auto-preference field -->
+        <!-- source: https://www.freeformatter.com/iso-country-list-html-select.html -->
+        <label for="site-country" class="h4">Country <span class="badge-pill badge-secondary">Required</span></label>
+        <select id="site-country" name="site-country" class="custom-select" required>
+          <option value="" disabled selected>Please select the country</option>
+          <option value="AF">Afghanistan</option>
+          <option value="AX">Åland Islands</option>
+          <option value="AL">Albania</option>
+          <option value="DZ">Algeria</option>
+          <option value="AS">American Samoa</option>
+          <option value="AD">Andorra</option>
+          <option value="AO">Angola</option>
+          <option value="AI">Anguilla</option>
+          <option value="AQ">Antarctica</option>
+          <option value="AG">Antigua and Barbuda</option>
+          <option value="AR">Argentina</option>
+          <option value="AM">Armenia</option>
+          <option value="AW">Aruba</option>
+          <option value="AU">Australia</option>
+          <option value="AT">Austria</option>
+          <option value="AZ">Azerbaijan</option>
+          <option value="BS">Bahamas</option>
+          <option value="BH">Bahrain</option>
+          <option value="BD">Bangladesh</option>
+          <option value="BB">Barbados</option>
+          <option value="BY">Belarus</option>
+          <option value="BE">Belgium</option>
+          <option value="BZ">Belize</option>
+          <option value="BJ">Benin</option>
+          <option value="BM">Bermuda</option>
+          <option value="BT">Bhutan</option>
+          <option value="BO">Bolivia, Plurinational State of</option>
+          <option value="BQ">Bonaire, Sint Eustatius and Saba</option>
+          <option value="BA">Bosnia and Herzegovina</option>
+          <option value="BW">Botswana</option>
+          <option value="BV">Bouvet Island</option>
+          <option value="BR">Brazil</option>
+          <option value="IO">British Indian Ocean Territory</option>
+          <option value="BN">Brunei Darussalam</option>
+          <option value="BG">Bulgaria</option>
+          <option value="BF">Burkina Faso</option>
+          <option value="BI">Burundi</option>
+          <option value="KH">Cambodia</option>
+          <option value="CM">Cameroon</option>
+          <option value="CA">Canada</option>
+          <option value="CV">Cape Verde</option>
+          <option value="KY">Cayman Islands</option>
+          <option value="CF">Central African Republic</option>
+          <option value="TD">Chad</option>
+          <option value="CL">Chile</option>
+          <option value="CN">China</option>
+          <option value="CX">Christmas Island</option>
+          <option value="CC">Cocos (Keeling) Islands</option>
+          <option value="CO">Colombia</option>
+          <option value="KM">Comoros</option>
+          <option value="CG">Congo</option>
+          <option value="CD">Congo, the Democratic Republic of the</option>
+          <option value="CK">Cook Islands</option>
+          <option value="CR">Costa Rica</option>
+          <option value="CI">Côte d'Ivoire</option>
+          <option value="HR">Croatia</option>
+          <option value="CU">Cuba</option>
+          <option value="CW">Curaçao</option>
+          <option value="CY">Cyprus</option>
+          <option value="CZ">Czech Republic</option>
+          <option value="DK">Denmark</option>
+          <option value="DJ">Djibouti</option>
+          <option value="DM">Dominica</option>
+          <option value="DO">Dominican Republic</option>
+          <option value="EC">Ecuador</option>
+          <option value="EG">Egypt</option>
+          <option value="SV">El Salvador</option>
+          <option value="GQ">Equatorial Guinea</option>
+          <option value="ER">Eritrea</option>
+          <option value="EE">Estonia</option>
+          <option value="ET">Ethiopia</option>
+          <option value="FK">Falkland Islands (Malvinas)</option>
+          <option value="FO">Faroe Islands</option>
+          <option value="FJ">Fiji</option>
+          <option value="FI">Finland</option>
+          <option value="FR">France</option>
+          <option value="GF">French Guiana</option>
+          <option value="PF">French Polynesia</option>
+          <option value="TF">French Southern Territories</option>
+          <option value="GA">Gabon</option>
+          <option value="GM">Gambia</option>
+          <option value="GE">Georgia</option>
+          <option value="DE">Germany</option>
+          <option value="GH">Ghana</option>
+          <option value="GI">Gibraltar</option>
+          <option value="GR">Greece</option>
+          <option value="GL">Greenland</option>
+          <option value="GD">Grenada</option>
+          <option value="GP">Guadeloupe</option>
+          <option value="GU">Guam</option>
+          <option value="GT">Guatemala</option>
+          <option value="GG">Guernsey</option>
+          <option value="GN">Guinea</option>
+          <option value="GW">Guinea-Bissau</option>
+          <option value="GY">Guyana</option>
+          <option value="HT">Haiti</option>
+          <option value="HM">Heard Island and McDonald Islands</option>
+          <option value="VA">Holy See (Vatican City State)</option>
+          <option value="HN">Honduras</option>
+          <option value="HK">Hong Kong</option>
+          <option value="HU">Hungary</option>
+          <option value="IS">Iceland</option>
+          <option value="IN">India</option>
+          <option value="ID">Indonesia</option>
+          <option value="IR">Iran, Islamic Republic of</option>
+          <option value="IQ">Iraq</option>
+          <option value="IE">Ireland</option>
+          <option value="IM">Isle of Man</option>
+          <option value="IL">Israel</option>
+          <option value="IT">Italy</option>
+          <option value="JM">Jamaica</option>
+          <option value="JP">Japan</option>
+          <option value="JE">Jersey</option>
+          <option value="JO">Jordan</option>
+          <option value="KZ">Kazakhstan</option>
+          <option value="KE">Kenya</option>
+          <option value="KI">Kiribati</option>
+          <option value="KP">Korea, Democratic People's Republic of</option>
+          <option value="KR">Korea, Republic of</option>
+          <option value="XK">Kosovo</option> <!-- added on request - see https://en.wikipedia.org/wiki/Kosovo for discussion in sidebar -->
+          <option value="KW">Kuwait</option>
+          <option value="KG">Kyrgyzstan</option>
+          <option value="LA">Lao People's Democratic Republic</option>
+          <option value="LV">Latvia</option>
+          <option value="LB">Lebanon</option>
+          <option value="LS">Lesotho</option>
+          <option value="LR">Liberia</option>
+          <option value="LY">Libya</option>
+          <option value="LI">Liechtenstein</option>
+          <option value="LT">Lithuania</option>
+          <option value="LU">Luxembourg</option>
+          <option value="MO">Macao</option>
+          <option value="MK">Macedonia, the former Yugoslav Republic of</option>
+          <option value="MG">Madagascar</option>
+          <option value="MW">Malawi</option>
+          <option value="MY">Malaysia</option>
+          <option value="MV">Maldives</option>
+          <option value="ML">Mali</option>
+          <option value="MT">Malta</option>
+          <option value="MH">Marshall Islands</option>
+          <option value="MQ">Martinique</option>
+          <option value="MR">Mauritania</option>
+          <option value="MU">Mauritius</option>
+          <option value="YT">Mayotte</option>
+          <option value="MX">Mexico</option>
+          <option value="FM">Micronesia, Federated States of</option>
+          <option value="MD">Moldova, Republic of</option>
+          <option value="MC">Monaco</option>
+          <option value="MN">Mongolia</option>
+          <option value="ME">Montenegro</option>
+          <option value="MS">Montserrat</option>
+          <option value="MA">Morocco</option>
+          <option value="MZ">Mozambique</option>
+          <option value="MM">Myanmar</option>
+          <option value="NA">Namibia</option>
+          <option value="NR">Nauru</option>
+          <option value="NP">Nepal</option>
+          <option value="NL">Netherlands</option>
+          <option value="NC">New Caledonia</option>
+          <option value="NZ">New Zealand</option>
+          <option value="NI">Nicaragua</option>
+          <option value="NE">Niger</option>
+          <option value="NG">Nigeria</option>
+          <option value="NU">Niue</option>
+          <option value="NF">Norfolk Island</option>
+          <option value="MP">Northern Mariana Islands</option>
+          <option value="NO">Norway</option>
+          <option value="OM">Oman</option>
+          <option value="PK">Pakistan</option>
+          <option value="PW">Palau</option>
+          <option value="PS">Palestinian Territory, Occupied</option>
+          <option value="PA">Panama</option>
+          <option value="PG">Papua New Guinea</option>
+          <option value="PY">Paraguay</option>
+          <option value="PE">Peru</option>
+          <option value="PH">Philippines</option>
+          <option value="PN">Pitcairn</option>
+          <option value="PL">Poland</option>
+          <option value="PT">Portugal</option>
+          <option value="PR">Puerto Rico</option>
+          <option value="QA">Qatar</option>
+          <option value="RE">Réunion</option>
+          <option value="RO">Romania</option>
+          <option value="RU">Russian Federation</option>
+          <option value="RW">Rwanda</option>
+          <option value="BL">Saint Barthélemy</option>
+          <option value="SH">Saint Helena, Ascension and Tristan da Cunha</option>
+          <option value="KN">Saint Kitts and Nevis</option>
+          <option value="LC">Saint Lucia</option>
+          <option value="MF">Saint Martin (French part)</option>
+          <option value="PM">Saint Pierre and Miquelon</option>
+          <option value="VC">Saint Vincent and the Grenadines</option>
+          <option value="WS">Samoa</option>
+          <option value="SM">San Marino</option>
+          <option value="ST">Sao Tome and Principe</option>
+          <option value="SA">Saudi Arabia</option>
+          <option value="SN">Senegal</option>
+          <option value="RS">Serbia</option>
+          <option value="SC">Seychelles</option>
+          <option value="SL">Sierra Leone</option>
+          <option value="SG">Singapore</option>
+          <option value="SX">Sint Maarten (Dutch part)</option>
+          <option value="SK">Slovakia</option>
+          <option value="SI">Slovenia</option>
+          <option value="SB">Solomon Islands</option>
+          <option value="SO">Somalia</option>
+          <option value="ZA">South Africa</option>
+          <option value="GS">South Georgia and the South Sandwich Islands</option>
+          <option value="SS">South Sudan</option>
+          <option value="ES">Spain</option>
+          <option value="LK">Sri Lanka</option>
+          <option value="SD">Sudan</option>
+          <option value="SR">Suriname</option>
+          <option value="SJ">Svalbard and Jan Mayen</option>
+          <option value="SZ">Swaziland</option>
+          <option value="SE">Sweden</option>
+          <option value="CH">Switzerland</option>
+          <option value="SY">Syrian Arab Republic</option>
+          <option value="TW">Taiwan, Province of China</option>
+          <option value="TJ">Tajikistan</option>
+          <option value="TZ">Tanzania, United Republic of</option>
+          <option value="TH">Thailand</option>
+          <option value="TL">Timor-Leste</option>
+          <option value="TG">Togo</option>
+          <option value="TK">Tokelau</option>
+          <option value="TO">Tonga</option>
+          <option value="TT">Trinidad and Tobago</option>
+          <option value="TN">Tunisia</option>
+          <option value="TR">Turkey</option>
+          <option value="TM">Turkmenistan</option>
+          <option value="TC">Turks and Caicos Islands</option>
+          <option value="TV">Tuvalu</option>
+          <option value="UG">Uganda</option>
+          <option value="UA">Ukraine</option>
+          <option value="AE">United Arab Emirates</option>
+          <option value="GB">United Kingdom</option>
+          <option value="US">United States</option>
+          <option value="UM">United States Minor Outlying Islands</option>
+          <option value="UY">Uruguay</option>
+          <option value="UZ">Uzbekistan</option>
+          <option value="VU">Vanuatu</option>
+          <option value="VE">Venezuela, Bolivarian Republic of</option>
+          <option value="VN">Viet Nam</option>
+          <option value="VG">Virgin Islands, British</option>
+          <option value="VI">Virgin Islands, U.S.</option>
+          <option value="WF">Wallis and Futuna</option>
+          <option value="EH">Western Sahara</option>
+          <option value="YE">Yemen</option>
+          <option value="ZM">Zambia</option>
+          <option value="ZW">Zimbabwe</option>
+        </select>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <label for="site-location" class="h4">Site address/location <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="text" class="form-control" id="site-location" name="site-location" placeholder="Street address and town if possible, otherwise the nearest settlement" pattern="[^\{\}]+" required />
+        <div class="invalid-feedback">
+          Please describe where the site is located, for example an address. Please do not use the characters { or }.
+        </div>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <!-- auto-preference field -->
+        <label for="site-contact" class="h4">Site Contact email address <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="email" inputmode="email" class="form-control" id="site-contact" name="site-contact" required />
+        <small id="siteContactHelperBlock" class="form-text text-muted mb-3">Please provide a contact email address for someone who can answer any follow up questions about
+        the site. If they are based at the site that is ideal.
+        </small>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <div class="input-group form-row">
+          <span class="input-group-text">Site Geolocation</span>
+          <input type="number" inputmode="decimal" step="0.0001" min="-90" max="90" class="form-control" placeholder="Latitude (decimal)" id="site-latitude" name="site-latitude" class="location-field"/>
+          <input type="number" inputmode="decimal" step="0.0001" min="-180" max="180" class="form-control" placeholder="Longitude (decimal)" id="site-longitude" name="site-longitude" class="location-field"/>
+          <input type="button" class="form-control btn btn-info" value="Get" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
+          <input type="hidden" id="location-source" name="location-source"/>
+          <input type="hidden" id="location-accuracy" name="location-accuracy"/>
+          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. If you are at
+            the site you can click the Get button to automatically fill the values based on what your browser detects as your location.<br/>
+            If you aren't at the site you will need to manually supply the values, or leave them blank. <br>
+            <strong>Please <em>don't</em> use the Get function if you aren't <em>currently at the site</em>!</strong><br/>
+            Latitude and longitude values <strong>must</strong> be in decimal format. Maximum of 4 decimal places.<br />
+            If you have the values in another format (e.g. degrees, minutes and seconds)
+            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.
+          </small>
+        </div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <label for="site-users" class="h4">Number of staff <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="number" class="form-control" id="site-users" name="site-users" required />
+        <div class="invalid-feedback">
+          Please tell us how many people work at the site.
+        </div>
+        <small id="siteUsersHelpBlock" class="form-text text-muted">How many people work at the site, including any from other organisations based at the site.
+        </small>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <label for="site-type" class="h4">Type of site</label>
+        <input type="text" class="form-control" id="site-type" name="site-type">
+        <small id=siteTypeHelperBlock" class="form-text text-muted">
+          How does your organisation categorise the site? For example, Office, Warehouse, Child Friendly Space.
+        </small>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <label for="site-beneficiaries" class="h4">Number of beneficiaries <span class="badge-pill badge-secondary">Required</span></label>
+        <input type="number" class="form-control" id="site-beneficiaries" name="site-beneficiaries" required />
+        <div class="invalid-feedback">
+          Please give an esitmate of how many people the site serves.
+        </div>
+        <small id="siteUsersHelpBlock" class="form-text text-muted">How many beneficiaries are served by the site. Estimates are fine.
+        </small>
+      </fieldset>
+
+    <fieldset class="form-group border p-3 bg-light">
+      <label for="site-comment" class="h2">Site Comment</label>
+      <input type="text" class="form-control" name="site-comment" id="site-comment" pattern="[^\{\}]+" >
+      <small class="form-text">Use this field to record anything else about the site
+        you want to record.</small>
+        <div class="invalid-feedback">
+          Please do not use the characters { or }.
+        </div>
+    </fieldset>
+    </fieldset>
+
+    <button class="btn btn-primary mb-2" type="submit">Gather Output</button>
+  </form>
+
+  <div id="site-data-container" class="container-sm border p-3 bg-light invisible">
+    <h2>Your site data</h2>
+    <small class="form-text pb-2">Below you will find the output of your answers above. Check to see that you 
+      agree. You can then click the Send this data by email
+      button to put the output into an email that you can send to whoever is collecting the data.
+    </small>
+    <pre id="site-data-json" class="pre-scrollable p-1 bg-info border"></pre>
+    <a class="btn btn-primary" id="send-email-button" target="_blank">Send this data by email</a>
+  </div>
+
+  <!-- Bootstrap Javascript dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+  
+  <script>
+  'use-strict';
+  // If this is going through testing populate the form with test values
+  $(document).ready(function(){
+      if(prefill === 'test'){
+        $('#org-code').val('CAI');
+        $('#site-name').val('test');
+        $('#site-country').val('GB');
+        $('#site-location').val('test');
+        $('#site-contact').val('test@test.com');
+        $('#site-users').val('100');
+      } else {
+        if (custom_org_name != '') $('#org-code').val(custom_org_name);
+      }
+
+      //If user inputs text into either of the location fields (latitude or longitude), change the location source to "manual"
+      $('#site-latitude').change(function(){
+        $('#location-source').val('manual');
+      });
+
+      /* Currently disabled as this overrides member and test data - needs work
+      
+      if (typeof(Storage) !== "undefined") {
+        if(localStorage.length != 0){
+          // populate defaults on the form - note this does not work properly if third party cookies are blocked unless localhost is whitelisted
+          // see https://stackoverflow.com/questions/55620680/how-do-i-allow-my-local-web-page-access-to-localstorage-in-brave-browser for more info
+          $("#org-name").val(localStorage.getItem("pref-org_name"));
+          $("#site-country").val(localStorage.getItem("pref-site_country"));
+        };
+      };*/
+    });
+  </script>
+</body>
+</html>
