@@ -17,6 +17,7 @@
     const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
     const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
     const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NH CAF site data';
+    const map_center = { lat: 13.5679438, lng: 37.0994953 };
 
     // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
     // unless page served via https:
@@ -622,7 +623,6 @@
       };*/
     });
 
-    const map_center = { lat: 13.5679438, lng: 37.0994953 };
     let map;
     let marker = false;
     let site_lat;
@@ -634,7 +634,8 @@
       // The map, centered on Tigray
         map = new google.maps.Map(document.getElementById("site-finder-map"), {
         zoom: 6,
-        center: map_center
+        center: map_center,
+        mapTypeId: 'hybrid'
       });
       
       map.addListener('click', function(e) {
@@ -643,7 +644,7 @@
                 marker = new google.maps.Marker({
                     position: e.latLng,
                     map: map,
-                    draggable: true
+                    draggable: true,
                 });
             } else {
                 marker.setPosition(e.latLng);
