@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Nethope Site Data Form</title>
+  <title>Nethope Tigray Situation Site Data Form</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
@@ -475,19 +475,43 @@
           <span class="input-group-text">Site Geolocation</span>
           <input type="number" inputmode="decimal" step="0.0001" min="-90" max="90" class="form-control" placeholder="Latitude (decimal)" id="site-latitude" name="site-latitude" class="location-field"/>
           <input type="number" inputmode="decimal" step="0.0001" min="-180" max="180" class="form-control" placeholder="Longitude (decimal)" id="site-longitude" name="site-longitude" class="location-field"/>
-          <input type="button" class="form-control btn btn-info" value="Get" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
+          <input type="button" class="form-control btn btn-info" value="Get from browser" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
+          <button type="button" class="form-control bnt btn-primary" title="Locate the site on a map" data-toggle="modal" data-target="#map-modal">Find on Map</button>
           <input type="hidden" id="location-source" name="location-source"/>
           <input type="hidden" id="location-accuracy" name="location-accuracy"/>
           <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. If you are at
-            the site you can click the <strong>Get</strong> button to automatically fill the values your browser detects.<br/>
-            If you aren't at the site please manually supply the values, or leave them blank.<br/>
-            <strong>Please <em>don't</em> use the Get function if you aren't <em>currently at the site</em>!</strong><br/>
+            the site you can click the <strong>Get from Browser</strong> button to automatically fill the values your browser detects.<br/>
+            If you aren't at the site you can use the Find on Map button to drop a pin at the sites location.<br/>
+            If you have the latitude and longitude already, you can enter them directly.
             Latitude and longitude values <strong>must</strong> be in decimal format. Maximum of 4 decimal places.<br />
             If you have the values in another format (e.g. degrees, minutes and seconds)
-            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.
+            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.<br/>
+            <strong>Please <em>don't</em> use the Get function if you aren't <em>currently at the site</em>!</strong><br/>
           </small>
         </div>
       </fieldset>
+
+      <!-- Map Modal -->
+      <div class="modal fade" id="map-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="mapModalLabel">Locate the site</h5>
+              <small>Zoom into the map until you can find the location of the site. Click on the map to drop a pin at the location. Drag the pin to move. Click Save Coordinates to add the coordiates to the form.</small>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div id="site-finder-map" style="width: 100%; height: 400px;"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" onClick="mapCoordinatesToMainForm()">Save coordinates</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <fieldset class="form-group">
         <label for="site-org" class="h4">Managing Organisation</label>
@@ -563,6 +587,9 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
 
+  <!-- Google Maps API -->
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBanSNStvSg4BHAf4zft_p1qTv2vuqbgUE&callback=initMap&libraries=&v=weekly" async defer></script>
+
   <script>
   'use-strict';
   // If this is going through testing populate the form with test values
@@ -594,6 +621,45 @@
         };
       };*/
     });
+
+    const map_center = { lat: 13.5679438, lng: 37.0994953 };
+    let map;
+    let marker = false;
+    let site_lat;
+    let site_long;
+    // Initialize and add the map
+    function initMap() {
+      // The location of Tigray
+      
+      // The map, centered on Tigray
+        map = new google.maps.Map(document.getElementById("site-finder-map"), {
+        zoom: 6,
+        center: map_center
+      });
+      
+      map.addListener('click', function(e) {
+            console.log(e);
+            if (marker === false){
+                marker = new google.maps.Marker({
+                    position: e.latLng,
+                    map: map,
+                    draggable: true
+                });
+            } else {
+                marker.setPosition(e.latLng);
+            }
+            site_lat = e.latLng.lat().toFixed(4);
+            site_long = e.latLng.lng().toFixed(4);
+        });
+    }
+
+    function mapCoordinatesToMainForm() {
+      $('#site-latitude').val(site_lat);
+      $('#site-longitude').val(site_long);
+      $('#location-source').val('map-script');
+      $('#location-accuracy').val(null);
+      $('#map-modal').modal('toggle');
+    }
   </script>
 </body>
 </html>
