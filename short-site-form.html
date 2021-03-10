@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-
+  
   <script>
     'use-strict';
     // Used to prepopulate form with data - specifics are be specifed in JS at the end of the file. 
@@ -105,12 +105,13 @@
   <header class="container">
     <h1>Nethope Site Data Form</h1>
     <p>The form below is designed to collect data about NetHope member's sites.</p>
+    <p>Items marked <span class="text-danger">*</span> are required.</p>
   </header>
   <form class="container needs-validation" id="site-form" novalidate onsubmit="event.preventDefault(); siteFormSubmit()">
     
     <fieldset class="form-group border p-3 bg-light">
       <!-- auto-preference field -->
-      <label for="org-code" class="h4">Your organisation <span class="badge-pill badge-secondary">Required</span></label>
+      <label for="org-code" class="h4">Your organisation <span class="text-danger">*</span></label>
       <select id="org-code" name="org-code" class="custom-select" required>
         <option selected disabled value="">Select your organisation</option>
         <option value="ACC">Accion</option>
@@ -177,16 +178,16 @@
         Please select your organisation.
       </div>
 
-      <label for="site-informer-name" class="h4 pt-2">Your name <span class="badge-pill badge-secondary">Required</span></label>
+      <label for="site-informer-name" class="h4 pt-2">Your name <span class="text-danger">*</span></label>
       <input type="text" class="form-control" id="site-informer-name" name="site-informer-name" required />
 
-      <label for="site-informer-email" class="h4 pt-2">Your email address <span class="badge-pill badge-secondary">Required</span></label>
+      <label for="site-informer-email" class="h4 pt-2">Your email address <span class="text-danger">*</span></label>
       <input type="email" class="form-control" id="site-informer-email" name="site-informer-name" required />
     </fieldset>
     
     <fieldset class="form-group border p-3 bg-light">
       <fieldset class="form-group">
-        <label for="site-name" class="h4">Site Name <span class="badge-pill badge-secondary">Required</span></label>
+        <label for="site-name" class="h4">Site Name <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="site-name" name="site-name" placeholder="Your organisation's name for the site" pattern="[^\{\}]+" required />
         <div class="invalid-feedback">
           Please give your site a name by which it can be identified. Please do not use the characters { or }.
@@ -196,10 +197,10 @@
       <fieldset class="form-group">
         <!-- auto-preference field -->
         <!-- source: https://www.freeformatter.com/iso-country-list-html-select.html -->
-        <label for="site-country" class="h4">Country <span class="badge-pill badge-secondary">Required</span></label>
+        <label for="site-country" class="h4">Country <span class="text-danger">*</span></label>
         <select id="site-country" name="site-country" class="custom-select" required>
-          <option value="" disabled selected>Please select the country</option>
-          <option value="AF">Afghanistan</option>
+          <option value="" disabled selected>Please select the country where the site is</option>
+    <!--  <option value="AF">Afghanistan</option>
           <option value="AX">Åland Islands</option>
           <option value="AL">Albania</option>
           <option value="DZ">Algeria</option>
@@ -268,9 +269,9 @@
           <option value="SV">El Salvador</option>
           <option value="GQ">Equatorial Guinea</option>
           <option value="ER">Eritrea</option>
-          <option value="EE">Estonia</option>
+          <option value="EE">Estonia</option>-->
           <option value="ET">Ethiopia</option>
-          <option value="FK">Falkland Islands (Malvinas)</option>
+          <!--<option value="FK">Falkland Islands (Malvinas)</option>
           <option value="FO">Faroe Islands</option>
           <option value="FJ">Fiji</option>
           <option value="FI">Finland</option>
@@ -319,7 +320,7 @@
           <option value="KP">Korea, Democratic People's Republic of</option>
           <option value="KR">Korea, Republic of</option>
           <option value="XK">Kosovo</option> <!-- added on request - see https://en.wikipedia.org/wiki/Kosovo for discussion in sidebar -->
-          <option value="KW">Kuwait</option>
+    <!--  <option value="KW">Kuwait</option>
           <option value="KG">Kyrgyzstan</option>
           <option value="LA">Lao People's Democratic Republic</option>
           <option value="LV">Latvia</option>
@@ -409,8 +410,8 @@
           <option value="GS">South Georgia and the South Sandwich Islands</option>
           <option value="SS">South Sudan</option>
           <option value="ES">Spain</option>
-          <option value="LK">Sri Lanka</option>
-          <option value="SD">Sudan</option>
+          <option value="LK">Sri Lanka</option>-->
+          <option value="SD">Sudan</option><!--
           <option value="SR">Suriname</option>
           <option value="SJ">Svalbard and Jan Mayen</option>
           <option value="SZ">Swaziland</option>
@@ -448,12 +449,12 @@
           <option value="EH">Western Sahara</option>
           <option value="YE">Yemen</option>
           <option value="ZM">Zambia</option>
-          <option value="ZW">Zimbabwe</option>
+          <option value="ZW">Zimbabwe</option>-->
         </select>
       </fieldset>
       
       <fieldset class="form-group">
-        <label for="site-location" class="h4">Site address/location <span class="badge-pill badge-secondary">Required</span></label>
+        <label for="site-location" class="h4">Site address/location <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="site-location" name="site-location" placeholder="Street address and town if possible, otherwise the nearest settlement" pattern="[^\{\}]+" required />
         <div class="invalid-feedback">
           Please describe where the site is located, for example an address. Please do not use the characters { or }.
@@ -489,7 +490,16 @@
       </fieldset>
 
       <fieldset class="form-group">
-        <label for="site-users" class="h4">Number of staff <span class="badge-pill badge-secondary">Required</span></label>
+        <label for="site-org" class="h4">Managing Organisation</label>
+        <input type="text" class="form-control" id="site-org" name="site-org" pattern="[^\{\}]+" />
+        <div class="invalid-feedback">
+          Please do not use the characters { or }.
+        </div>
+        <small id="siteOrgHelperBlock" class="form-text text-muted">If another organisation (for example a local partner) manages the site, please tell us their name.</small>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <label for="site-users" class="h4">Number of staff <span class="text-danger">*</span></label>
         <input type="number" class="form-control" id="site-users" name="site-users" required />
         <div class="invalid-feedback">
           Please tell us how many people work at the site.
@@ -501,7 +511,7 @@
       <fieldset class="form-group">
         <label for="site-type" class="h4">Type of site</label>
         <input type="text" class="form-control" id="site-type" name="site-type" pattern="[^\{\}]+">
-        <small id=siteTypeHelperBlock" class="form-text text-muted">
+        <small id="siteTypeHelperBlock" class="form-text text-muted">
           How does your organisation categorise the site? For example, Office, Warehouse, Child Friendly Space.
         </small>
         <div class="invalid-feedback">
@@ -516,7 +526,7 @@
       </div>
       
       <fieldset class="form-group">
-        <label for="site-beneficiaries" class="h4 pt-2">Number of beneficiaries <span class="badge-pill badge-secondary">Required</span></label>
+        <label for="site-beneficiaries" class="h4 pt-2">Number of beneficiaries <span class="text-danger">*</span></label>
         <input type="number" class="form-control" id="site-beneficiaries" name="site-beneficiaries" required />
         <div class="invalid-feedback">
           Please give an estimate of how many people the site serves.
@@ -526,7 +536,7 @@
 
 
       <fieldset class="form-group bg-light">
-        <label for="site-comment" class="h2">Site Comment</label>
+        <label for="site-comment" class="h4">Site Comment</label>
         <input type="text" class="form-control" name="site-comment" id="site-comment" pattern="[^\{\}]+" >
         <small class="form-text text-muted">Use this field to record anything else about the site
           you want to record.</small>
@@ -551,8 +561,8 @@
 
   <!-- Bootstrap Javascript dependencies -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+
   <script>
   'use-strict';
   // If this is going through testing populate the form with test values
