@@ -624,6 +624,7 @@
       // Zoom to current location button
       infoWindow = new google.maps.InfoWindow();
       const locationButton = document.createElement("button");
+      // set type to button to avoid submit action (default type of button!)
       locationButton.type = "button";
       locationButton.textContent = "Zoom to your current location";
       locationButton.classList.add("custom-map-control-button");
@@ -661,11 +662,11 @@
     function setManualCoords(){
         //Check if coordinates have been added to form fields
         if ($('#site-latitude').val()!= "" && $('#site-longitude').val()!= ""){
-          man_pos = new google.maps.LatLng(parseFloat($('#site-latitude').val()), parseFloat($('#site-longitude').val()));
+          let man_pos = new google.maps.LatLng(parseFloat($('#site-latitude').val()), parseFloat($('#site-longitude').val()));
 
           // recenter the map on the coords and zoom in
           map.setCenter(man_pos);
-          map.setZoom(10);
+          map.setZoom(11);
           
           // drop a marker at the coords
           dropMarker(man_pos);
