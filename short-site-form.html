@@ -647,7 +647,7 @@
             dropMarker(e.latLng);
             site_lat = e.latLng.lat().toFixed(4);
             site_long = e.latLng.lng().toFixed(4);
-        });
+      });
 
         // Zoom to current location button
         infoWindow = new google.maps.InfoWindow();
@@ -700,15 +700,21 @@
 
     function dropMarker(pos){
       if (marker === false){
-                marker = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    draggable: true,
-                    animation: google.maps.Animation.DROP
-                });
-            } else {
-                marker.setPosition(pos);
-            }
+        marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP
+        });
+      } else {
+        marker.setPosition(pos);
+      };
+
+      google.maps.event.addListener(marker, 'dragend', function(e) {
+        console.log(e);
+        site_lat = e.latLng.lat().toFixed(4);
+        site_long = e.latLng.lng().toFixed(4);
+      })
     }
 
     function handleLocationError(browserHasGeolocation, infoWindow, pos) {
