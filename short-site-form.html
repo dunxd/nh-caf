@@ -16,10 +16,10 @@
     let searchParams = new URLSearchParams(window.location.search);
     const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
     const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
-    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NH CAF site data';
+    const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NetHope Tigray Situation Site Data';
     const map_center = { lat: 13.5679438, lng: 37.0994953 };
 
-    // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
+    /* // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
     // unless page served via https:
     function getLocation(){
       const options = {
@@ -42,6 +42,7 @@
       $('#location-source').val('browser-script');
       $('#location-accuracy').val(position.coords.accuracy);
     }
+    */
 
     function siteFormSubmit(){
 
@@ -200,7 +201,7 @@
         <!-- source: https://www.freeformatter.com/iso-country-list-html-select.html -->
         <label for="site-country" class="h4">Country <span class="text-danger">*</span></label>
         <select id="site-country" name="site-country" class="custom-select" required>
-          <option value="" disabled selected>Please select the country where the site is</option>
+          <option value="" disabled selected>Select the country where the site is</option>
     <!--  <option value="AF">Afghanistan</option>
           <option value="AX">Åland Islands</option>
           <option value="AL">Albania</option>
@@ -458,7 +459,7 @@
         <label for="site-location" class="h4">Site address/location <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="site-location" name="site-location" placeholder="Street address and town if possible, otherwise the nearest settlement" pattern="[^\{\}]+" required />
         <div class="invalid-feedback">
-          Please describe where the site is located, for example an address. Please do not use the characters { or }.
+          Describe where the site is located, for example an address. Please do not use the characters { or }.
         </div>
       </fieldset>
       
@@ -466,7 +467,7 @@
         <!-- auto-preference field -->
         <label for="site-contact" class="h4">Site Contact email address</label>
         <input type="email" inputmode="email" class="form-control" id="site-contact" name="site-contact" />
-        <small id="siteContactHelperBlock" class="form-text text-muted mb-3">Please provide a contact email address for someone who can answer any follow up questions about
+        <small id="siteContactHelperBlock" class="form-text text-muted mb-3">Provide a contact email address for someone who can answer any follow up questions about
         the site. If they are based at the site that is ideal. If no email address is included here, your email address will be used.
         </small>
       </fieldset>
@@ -476,20 +477,17 @@
           <span class="input-group-text">Site Geolocation</span>
           <input type="number" inputmode="decimal" step="0.0001" min="-90" max="90" class="form-control" placeholder="Latitude (decimal)" id="site-latitude" name="site-latitude" class="location-field"/>
           <input type="number" inputmode="decimal" step="0.0001" min="-180" max="180" class="form-control" placeholder="Longitude (decimal)" id="site-longitude" name="site-longitude" class="location-field"/>
-          <input type="button" class="form-control btn btn-info" value="Get from browser" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
-          <button type="button" class="form-control bnt btn-primary" title="Locate the site on a map" data-toggle="modal" data-target="#map-modal">Find on Map</button>
+          <!--<input type="button" class="form-control btn btn-info" value="Get from browser" onclick="getLocation()" title="Get current latitude and longitude from browser"/> //-->
+          <button type="button" class="form-control bnt btn-primary" title="Locate the site on a map" data-toggle="modal" data-target="#map-modal" onclick="setManualCoords();">Find on Map</button>
           <input type="hidden" id="location-source" name="location-source"/>
           <input type="hidden" id="location-accuracy" name="location-accuracy"/>
-          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. If you are at
-            the site you can click the <strong>Get from Browser</strong> button to automatically fill the values your browser detects.<br/>
-            If you aren't at the site you can use the Find on Map button to drop a pin at the sites location.<br/>
-            If you have the latitude and longitude already, you can enter them directly.
+        </div>
+          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. Use <strong>Find on Map</strong> to drop a pin a the site's location.<br/>
+            If you have the latitude and longitude already, enter them directly. You can use Find on Map to verify these coordinates.<br/>
             Latitude and longitude values <strong>must</strong> be in decimal format. Maximum of 4 decimal places.<br />
             If you have the values in another format (e.g. degrees, minutes and seconds)
-            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.<br/>
-            <strong>Please <em>don't</em> use the Get function if you aren't <em>currently at the site</em>!</strong><br/>
+            convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.
           </small>
-        </div>
       </fieldset>
 
       <!-- Map Modal -->
@@ -498,7 +496,9 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="mapModalLabel">Locate the site</h5>
-              <small>Zoom into the map until you can find the location of the site. Click on the map to drop a pin at the location. Drag the pin to move. Click Save Coordinates to add the coordiates to the form.</small>
+              <small class="form-text pl-2">Zoom into the map until you can find the location of the site.<br/>
+                Click on the map to drop a pin at the location.Drag the pin to move it.<br/>
+                Click Save Coordinates to add the coordiates to the form.</small>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -629,9 +629,7 @@
     let site_long;
     // Initialize and add the map
     function initMap() {
-      // The location of Tigray
-      
-      // The map, centered on Tigray
+      // The map, centered on location set at top of page code
         map = new google.maps.Map(document.getElementById("site-finder-map"), {
         zoom: 6,
         center: map_center,
@@ -640,18 +638,80 @@
       
       map.addListener('click', function(e) {
             console.log(e);
-            if (marker === false){
+            dropMarker(e.latLng);
+            site_lat = e.latLng.lat().toFixed(4);
+            site_long = e.latLng.lng().toFixed(4);
+        });
+
+        // Zoom to current location button
+        infoWindow = new google.maps.InfoWindow();
+        const locationButton = document.createElement("button");
+        locationButton.type = "button";
+        locationButton.textContent = "Zoom to your current location";
+        locationButton.classList.add("custom-map-control-button");
+        locationButton.classList.add("btn");
+        locationButton.classList.add("btn-light");
+        locationButton.classList.add("mt-2");
+        locationButton.classList.add("btn-sm")
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+        locationButton.addEventListener("click", () => {
+          // Try HTML5 Geolocation
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const pos = {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                };
+                infoWindow.setPosition(pos);
+                infoWindow.setContent("Approxiate location found - click map to drop pin at actual location");
+                infoWindow.open(map);
+                map.setCenter(pos);
+                map.setZoom(11)
+              },
+              () => {
+                handleLocationError(true, infoWindow, map.getCenter());
+              }
+            );
+          } else {
+            // Browser doesn't support Geolocation
+            handleLocationError(false, infoWindow, map.getCenter());
+          }
+        });
+    }
+
+    function setManualCoords(){
+        //Check if coordinates have been added to form fields
+        if ($('#site-latitude').val()!= "" && $('#site-longitude').val()!= ""){
+          // recenter the map on the coords and zoom in
+          man_pos = { lat: parseFloat($('#site-latitude').val()), lng: parseFloat($('#site-longitude').val()) };
+          map.setCenter(man_pos);
+          // drop a marker at the coords
+          dropMarker(man_pos);
+          return false;
+        } else return false;
+    }
+
+    function dropMarker(pos){
+      if (marker === false){
                 marker = new google.maps.Marker({
-                    position: e.latLng,
+                    position: pos,
                     map: map,
                     draggable: true,
                 });
             } else {
-                marker.setPosition(e.latLng);
+                marker.setPosition(pos);
             }
-            site_lat = e.latLng.lat().toFixed(4);
-            site_long = e.latLng.lng().toFixed(4);
-        });
+    }
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+      infoWindow.setPosition(pos);
+      infoWindow.setContent(
+        browserHasGeolocation
+          ? "Error: The Geolocation service failed."
+          : "Error: Your browser doesn't support geolocation."
+      );
+      infoWindow.open(map);
     }
 
     function mapCoordinatesToMainForm() {
