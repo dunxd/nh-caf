@@ -484,7 +484,10 @@
               </button>
             </div>
             <div class="modal-body">
+
+              <!-- the next div is used for drawing the map -->
               <div id="site-finder-map" style="width: 100%; height: 400px;"></div>
+
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -658,9 +661,12 @@
     function setManualCoords(){
         //Check if coordinates have been added to form fields
         if ($('#site-latitude').val()!= "" && $('#site-longitude').val()!= ""){
+          man_pos = new google.maps.LatLng(parseFloat($('#site-latitude').val()), parseFloat($('#site-longitude').val()));
+
           // recenter the map on the coords and zoom in
-          man_pos = { lat: parseFloat($('#site-latitude').val()), lng: parseFloat($('#site-longitude').val()) };
           map.setCenter(man_pos);
+          map.setZoom(10);
+          
           // drop a marker at the coords
           dropMarker(man_pos);
           return false;
