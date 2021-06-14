@@ -12,35 +12,14 @@
     // Minimal required fields are currently populated if this is set to true
     const prefill = false; // prefill can be false, true for test data
 
+    // set the coordinates of a default center for the map
+    const map_center = { lat: 13.5679438, lng: 37.0994953 };
+
     // set up presets using URL parameters
     let searchParams = new URLSearchParams(window.location.search);
     const custom_org_name = searchParams.has('org-code') ?  searchParams.get('org-code') : '';
     const email_to_address = searchParams.has('dest-email') ?  searchParams.get('dest-email') : 'duncan.drury@nethope.org';
     const email_subject = searchParams.has('email-subject') ? searchParams.get('email-subject') : 'NH CAF site data';
-
-    // Gets current location data from browser.  Works offline in Chrome on PC, but in Android location data is not available
-    // unless page served via https:
-    function getLocation(){
-      const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-      }
-      if (navigator.geolocation){
-        // get location then pass it to showLocation() for writing into form
-        navigator.geolocation.getCurrentPosition(showLocation,null,options);
-      } else {
-        alert("Geolocation is not supported in this browser.");
-      }
-    }
-    
-    //displays location data in appropriate form fields
-    function showLocation(position){
-      $('#site-latitude').val(position.coords.latitude.toFixed(4)); // use toFixed to round to the same decimal places as used in form validation
-      $('#site-longitude').val(position.coords.longitude.toFixed(4));
-      $('#location-source').val('browser-script');
-      $('#location-accuracy').val(position.coords.accuracy);
-    }
 
     function siteFormSubmit(){
 
@@ -471,19 +450,44 @@
           <span class="input-group-text">Site Geolocation</span>
           <input type="number" inputmode="decimal" step="0.0001" min="-90" max="90" class="form-control" placeholder="Latitude (decimal)" id="site-latitude" name="site-latitude" class="location-field"/>
           <input type="number" inputmode="decimal" step="0.0001" min="-180" max="180" class="form-control" placeholder="Longitude (decimal)" id="site-longitude" name="site-longitude" class="location-field"/>
-          <input type="button" class="form-control btn btn-info" value="Get" onclick="getLocation()" title="Get current latitude and longitude from browser"/>
+          <button type="button" class="form-control bnt btn-primary" title="Locate the site on a map" data-toggle="modal" data-target="#map-modal" onclick="setManualCoords();">Find on Map</button>
           <input type="hidden" id="location-source" name="location-source"/>
           <input type="hidden" id="location-accuracy" name="location-accuracy"/>
-          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. If you are at
-            the site you can click the Get button to automatically fill the values based on what your browser detects as your location.<br/>
-            If you aren't at the site you will need to manually supply the values, or leave them blank. <br>
-            <strong>Please <em>don't</em> use the Get function if you aren't <em>currently at the site</em>!</strong><br/>
+        </div>
+          <small id="geoHelpBlock" class="form-text text-muted mb-3">The geolocation of the site is extremely useful. Use <strong>Find on Map</strong> to drop a pin at the site's location, or to verify coordinates you have entered.<br/>
+            If you have the latitude and longitude already, enter them directly. You can use Find on Map to verify these coordinates.<br/>
             Latitude and longitude values <strong>must</strong> be in decimal format. Maximum of 4 decimal places.<br />
             If you have the values in another format (e.g. degrees, minutes and seconds)
             convert them at <a href="https://latlongdata.com/lat-long-converter/" target="_blank">Lat Long Data</a>.
           </small>
-        </div>
       </fieldset>
+
+            <!-- Map Modal -->
+            <div class="modal fade" id="map-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">Locate the site</h5>
+                    <small class="form-text pl-2">Zoom into the map until you can find the location of the site.<br/>
+                      Click on the map to drop a pin at the location.Drag the pin to move it.<br/>
+                      Click Save Coordinates to add the coordiates to the form.</small>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+      
+                    <!-- the next div is used for drawing the map -->
+                    <div id="site-finder-map" style="width: 100%; height: 400px;"></div>
+      
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onClick="mapCoordinatesToMainForm()">Save coordinates</button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
       <fieldset class="form-group">
         <label for="site-users" class="h4">Number of users <span class="badge-pill badge-secondary">Required</span></label>
@@ -916,6 +920,9 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
   
+  <!-- Google Maps API -->
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBanSNStvSg4BHAf4zft_p1qTv2vuqbgUE&callback=initMap&libraries=&v=weekly" async defer></script>
+
   <script>
   'use-strict';
   // If this is going through testing populate the form with test values
@@ -939,6 +946,8 @@
         $('#location-source').val('manual');
       });
 
+
+
       /* Currently disabled as this overrides member and test data - needs work
       
       if (typeof(Storage) !== "undefined") {
@@ -950,6 +959,123 @@
         };
       };*/
     });
+
+    // Setting up variables needed for Google Maps
+    let map;
+    let marker = false;
+    let site_lat;
+    let site_long;
+
+    // Initialize and add the map
+    function initMap() {
+      // The map, centered on location set at top of page code
+        map = new google.maps.Map(document.getElementById("site-finder-map"), {
+        zoom: 6,
+        center: map_center,
+        mapTypeId: 'hybrid'
+      });
+      
+      // add listener to notice when map is clicked to drop a listener
+      map.addListener('click', function(e) {
+            dropMarker(e.latLng);
+      });
+
+      // Zoom to current location button
+      infoWindow = new google.maps.InfoWindow();
+      const locationButton = document.createElement("button");
+      // set type to button to avoid submit action (default type of button!)
+      locationButton.type = "button";
+      locationButton.textContent = "Zoom to your current location";
+      locationButton.classList.add("custom-map-control-button");
+      locationButton.classList.add("btn");
+      locationButton.classList.add("btn-light");
+      locationButton.classList.add("mt-2");
+      locationButton.classList.add("btn-sm")
+      map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+      locationButton.addEventListener("click", () => {
+        // Try HTML5 Geolocation
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+              infoWindow.setPosition(pos);
+              infoWindow.setContent("Approxiate location found - click map to drop pin at actual location");
+              infoWindow.open(map);
+              map.setCenter(pos);
+              map.setZoom(11)
+            },
+            () => {
+              handleLocationError(true, infoWindow, map.getCenter());
+            }
+          );
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+      });
+    }
+
+    function setManualCoords(){
+        //Check if coordinates have been added to form fields
+        if ($('#site-latitude').val()!= "" && $('#site-longitude').val()!= ""){
+          let man_pos = new google.maps.LatLng(parseFloat($('#site-latitude').val()), parseFloat($('#site-longitude').val()));
+
+          // recenter the map on the coords and zoom in
+          map.setCenter(man_pos);
+          map.setZoom(11);
+          
+          // drop a marker at the coords
+          dropMarker(man_pos);
+          return false;
+        } else return false;
+    }
+
+    // Drop a marker or handle moving it elsewhere
+    function dropMarker(pos){
+      if (marker === false){
+        marker = new google.maps.Marker({
+          position: pos,
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP
+        });
+      
+        // Add listener that will store the end value when the marker is moved to a new location
+        // Note that relocating using clicks triggers the event listener
+        google.maps.event.addListener(marker, 'dragend', function(e) {
+          getMarkerPosition(e.latLng);
+        });
+      } else {
+        marker.setPosition(pos);
+      };
+      getMarkerPosition(pos);
+    }
+
+    function getMarkerPosition(pos){
+      site_lat = pos.lat().toFixed(4);
+      site_long = pos.lng().toFixed(4);
+    }
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+      infoWindow.setPosition(pos);
+      infoWindow.setContent(
+        browserHasGeolocation
+          ? "Error: The Geolocation service failed."
+          : "Error: Your browser doesn't support geolocation."
+      );
+      infoWindow.open(map);
+    }
+
+    function mapCoordinatesToMainForm() {
+      $('#site-latitude').val(site_lat);
+      $('#site-longitude').val(site_long);
+      $('#location-source').val('map-script');
+      $('#location-accuracy').val(null);
+      $('#map-modal').modal('toggle');
+    }
   </script>
 </body>
 </html>
