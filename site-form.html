@@ -526,7 +526,7 @@
           Please tell us the upload bandwidth.
         </div>
       </div>
-      <small id="bandwidthHelpBlock" class="form-text">In all cases, provide the bandwidth the ISP claims. If they give the 
+      <small id="bandwidthHelpBlock" class="form-text">In all cases, provide the bandwidth the Internet Service Provider claims. If they give the 
         bandwidth in MBps, multiply by 1000.
       </small>
     </fieldset>
@@ -548,6 +548,7 @@
         <option value="vsat-ku-band">VSAT Ku Band</option>
         <option value="vsat-ka-band">VSAT Ka Band</option>
         <option value="o3b">O3B</option>
+        <option value="leo">Low Earth Orbit (e.g. StarLink)</option>
       </select>
       <div class="invalid-feedback">
         Please select a link type
@@ -562,7 +563,7 @@
     </fieldset>
 
     <fieldset class="form-group border p-3 bg-light" id="isp-q">
-      <label for="isp-name" class="h3">ISP Name</label>
+      <label for="isp-name" class="h3">Internet Service Provider Name</label>
       <input type="text" class="form-control" id="isp-name" name="isp-name" placeholder="Name of ISP">
     </fieldset>
 
@@ -587,12 +588,12 @@
         <option value="1">1:1</option>
         <option value="2">2:1</option>
         <option value="3-5">3:1 - 5:1</option>
-        <option value="5-10">5:1 - 10:1</option>
+        <option value="6-10">6:1 - 10:1</option>
         <option value="11-50">11:1 - 50:1</option>
         <option value=">50">more than 50:1</option>
       </select>
       <small id="contentionRatioHelpBlock" class="form-text">
-        Many ISPs offer a shared or contended connection at a lower cost. This 
+        Many Internet Service Providers offer a shared or contended connection at a lower cost. This 
         is recorded as a ratio of the number of customers sharing the connection to 1.
       </small>
     </fieldset>
@@ -611,13 +612,13 @@
         <input class="custom-control-input" type="radio" name="latency" id="extreme-latency" value="extreme" novalidate  />
         <label class="custom-control-label" for="extreme-latency">Extremely High<br />
           <small class="form-text">RTT greater than 800. Regular latency above 
-          this should always be raised with the ISP.</small></label>
+          this should always be raised with the Internet Service Provider.</small></label>
       </div>
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="latency" id="high-latency" value="high" />
         <label class="custom-control-label" for="high-latency">High<br />
         <small class="form-text">RTT greater than 500.  Geostationary VSAT will always have values over this.  
-        For non-VSAT connection, raise these latencies with the ISP.</small></label>
+        For non-VSAT connection, raise these latencies with the Internet Service Provider.</small></label>
       </div>
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="latency" id="medium-latency" value="medium" />
@@ -654,24 +655,24 @@
     </fieldset>
 
     <fieldset class="form-group border p-3 bg-light">
-      <label for="class-of-service" class="h2">Class of Service/SLA</label>
+      <label for="class-of-service" class="h2">Class of Service/Service Levek Agreement</label>
       <small id="classOfServiceHelperBlock" class="form-text text-muted pb-2">This assesses the relationship between 
         your organisation and the ISP in relation to the site. Is the product bought offered by the ISP as 
         business class, or does it have a Service Level Agreement (<dfn>SLA</dfn>) tailored to the site’s needs? Or has a residential product been 
         selected. If the connection is with a Mobile Network Operator (<dfn>MNO</dfn>), is it specifically marketed as suitable for use by multiple 
-        users at a single site, or is it intended for use on a single cell phone? Does the ISP give you insight 
+        users at a single site, or is it intended for use on a single cell phone? Does the Internet Service Provider give you insight 
         into the usage of the connection in the form of a web portal or regular reports that show bandwidth used, 
         uptime etc?</small>
         <div class="custom-control custom-radio">
           <input class="custom-control-input" type="radio" name="class-of-service" id="business-class-sla" value="business-class-sla" />
-          <label class="custom-control-label" for="business-class-sla">Business Class with SLA<br />
-          <small class="form-text">Fit for purpose SLA with online portal that allow monitoring of link availability and bandwidth 
+          <label class="custom-control-label" for="business-class-sla">Business Class with Service Level Agreement<br />
+          <small class="form-text">Fit for purpose Service Level Agreement with online portal that allow monitoring of link availability and bandwidth 
             usage (categorised or total?)</small></label>
         </div>
         <div class="custom-control custom-radio">
           <input class="custom-control-input" type="radio" name="class-of-service" id="business-class" value="business-class" />
           <label class="custom-control-label" for="business-class">Business Class<br />
-          <small class="form-text">ISP markets the product as designed for business use but little visibility into traffic use or 
+          <small class="form-text">Internet Service Provider markets the product as designed for business use but little visibility into traffic use or 
             uptime unless requested</small></label>
         </div>
         <div class="custom-control custom-radio">
@@ -698,9 +699,9 @@
       </fieldset>
 
     <fieldset class="form-group border p-3 bg-light">
-      <label for="isp-trust" class="h2">ISP Trust</label>
+      <label for="isp-trust" class="h2">Internet Service Provider Trust</label>
       <small class="form-text text-muted pb-2" id="ispTrustHelperBlock">Many of the measures rely on figures supplied 
-        by the ISP. Hopefully you can take these with trust, but there may be cases where you feel the ISP is not 
+        by the Internet Service Provider. Hopefully you can take these with trust, but there may be cases where you feel the Internet Service Provider is not 
         honest or competent and you aren’t getting the bandwidth, availability or performance you expected.</small>
         <div class="custom-control custom-radio">
           <input class="custom-control-input" type="radio" name="isp-trust" id="high-trust" value="high-trust" />
@@ -708,12 +709,12 @@
         </div>
         <div class="custom-control custom-radio">
           <input class="custom-control-input" type="radio" name="isp-trust" id="medium-trust" value="medium-trust" />
-          <label class="custom-control-label" for="medium-trust">Generally you trust the ISP, but they may not be able to deliver exactly 
+          <label class="custom-control-label" for="medium-trust">Generally you trust the Internet Service Provider, but they may not be able to deliver exactly 
             as they say all the time.  But it isn’t bad enough to switch to a different supplier.</label>
         </div>
         <div class="custom-control custom-radio">
           <input class="custom-control-input" type="radio" name="isp-trust" id="low-trust" value="low-trust" />
-          <label class="custom-control-label" for="low-trust">You do not trust the ISP, and believe they have lied to you about the level 
+          <label class="custom-control-label" for="low-trust">You do not trust the Internet Service Provider, and believe they have lied to you about the level 
             of service they promised. You are actively seeking a new supplier or are stuck with this one for some reason.</label>
         </div>
       </fieldset>
@@ -758,7 +759,7 @@
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="site-support" id="support-available" value="available" />
         <label class="custom-control-label" for="support-available">Available<br />
-        <small class="form-text">When an issue arises with the connection, someone from your team or the ISP can attend the site to resolve the issue within 
+        <small class="form-text">When an issue arises with the connection, someone from your team or the Internet Service Provider can attend the site to resolve the issue within 
           one business day.</small></label>
       </div>
       <div class="custom-control custom-radio">
@@ -772,6 +773,11 @@
       <small class="form-text text-muted pb-2" id="powerSupplyHelperBlock">
         Internet outages are frequently caused by local power outages at your site.  Assess whether measures have been taken to reduce the risk of this.
       </small>
+      <div class="custom-control custom-radio">
+        <input class="custom-control-input" type="radio" name="power-supply" id="no-power" value="no-power" />
+        <label class="custom-control-label" for="no-power">No Power at the site<br />
+        <small class="form-text">There is no power supply currently at the site. This may be because power is planned in the future, or just to record sites that don't have a power supply for any reason.</small></label>
+      </div>
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="power-supply" id="reliable-grid" value="reliable-grid" />
         <label class="custom-control-label" for="reliable-grid">Reliable grid<br />
@@ -827,7 +833,7 @@
         <input class="custom-control-input" type="radio" name="connection-management" id="monitoring-only" value="monitoring-only" />
         <label class="custom-control-label" for="monitoring-only">Monitoring only<br />
         <small class="form-text">No kind of management is possible but some form of monitoring has been applied by the NGO – this can 
-          be as little as uptime monitoring independent of the ISP.</small></label>
+          be as little as uptime monitoring independent of the Internet Service Provider.</small></label>
       </div>
       <div class="custom-control custom-radio">
         <input class="custom-control-input" type="radio" name="connection-management" id="no-management" value="no-management" />
